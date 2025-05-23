@@ -255,6 +255,16 @@
                         <label class="block text-gray-700 mb-2" for="accountPassword">New Password (optional)</label>
                         <input type="password" id="accountPassword" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Data Management</label>
+                        <div class="flex space-x-2">
+                            <button type="button" id="exportNotesBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Export Notes</button>
+                            <div class="file-upload">
+                                <input type="file" id="importNotesInput" accept=".json" class="hidden">
+                                <label for="importNotesInput" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg cursor-pointer">Import Notes</label>
+                            </div>
+                        </div>
+                    </div>
                     <div class="flex justify-end">
                         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">Save Changes</button>
                     </div>
@@ -506,12 +516,32 @@
     </div>
 
     <script>
-        // Initialize data storage
-        if (!localStorage.getItem('users')) {
-            localStorage.setItem('users', JSON.stringify([]));
-        }
-        
-        if (!localStorage.getItem('notes')) {
+        // IndexedDB setup
+        let db;
+        const dbRequest = indexedDB.open('StudyShareDB', 1);
+
+        dbRequest.onupgradeneeded = function(event) {
+            db = event.target.result;
+            if (!db.objectStoreNames.contains('users')) {
+                db.createObjectStore('users', { keyPath: 'id' });
+            }
+            if (!db.objectStoreNames.contains('notes')) {
+                db.createObjectStore('notes', { keyPath: 'id' });
+            }
+        };
+
+        dbRequest.onsuccess = function(event) {
+            db = event.target.result;
+            initializeApp();
+        };
+
+        dbRequest.onerror = function(event) {
+            console.error('IndexedDB error:', event.target.errorCode);
+            showToast('Database initialization failed', 'error');
+        };
+
+        // Initialize sample data
+        async function initializeSampleData() {
             const sampleNotes = [
                 {
                     id: 1,
@@ -598,14 +628,72 @@
                     fileData: null
                 }
             ];
-            localStorage.setItem('notes', JSON.stringify(sampleNotes));
+
+            const notes = await getAllNotes();
+            if (notes.length === 0) {
+                const tx = db.transaction('notes', 'readwrite');
+                const store = tx.objectStore('notes');
+                sampleNotes.forEach(note => store.put(note));
+                await tx.complete;
+            }
         }
-        
+
+        // IndexedDB helper functions
+        function getAllUsers() {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('users', 'readonly');
+                const store = tx.objectStore('users');
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        function getAllNotes() {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('notes', 'readonly');
+                const store = tx.objectStore('notes');
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        function getUser(id) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('users', 'readonly');
+                const store = tx.objectStore('users');
+                const request = store.get(id);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        function putUser(user) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('users', 'readwrite');
+                const store = tx.objectStore('users');
+                const request = store.put(user);
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        function putNote(note) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('notes', 'readwrite');
+                const store = tx.objectStore('notes');
+                const request = store.put(note);
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+
         // Current user state
         let currentUser = null;
         let currentPage = 1;
         const notesPerPage = 6;
-        
+
         // DOM Elements
         const loginBtn = document.getElementById('loginBtn');
         const registerBtn = document.getElementById('registerBtn');
@@ -644,28 +732,30 @@
         const pagination = document.getElementById('pagination');
         const currentProfilePic = document.getElementById('currentProfilePic');
         const previewNoteAuthorPic = document.getElementById('previewNoteAuthorPic');
-        
+        const exportNotesBtn = document.getElementById('exportNotesBtn');
+        const importNotesInput = document.getElementById('importNotesInput');
+
         // Mobile menu toggle
         const mobileMenuButton = document.querySelector('.mobile-menu-button');
         const mobileMenu = document.querySelector('.mobile-menu');
-        
+
         mobileMenuButton.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
         });
-        
-        // Check if user is logged in on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            const loggedInUser = localStorage.getItem('currentUser');
+
+        // Initialize app
+        async function initializeApp() {
+            await initializeSampleData();
+            const loggedInUser = await getUser('currentUser');
             if (loggedInUser) {
-                currentUser = JSON.parse(loggedInUser);
+                currentUser = loggedInUser;
                 updateAuthUI();
             }
-            
             renderNotes();
             updateStats();
             setupSearchAndFilter();
-        });
-        
+        }
+
         // Update authentication UI
         function updateAuthUI() {
             if (currentUser) {
@@ -684,30 +774,30 @@
                 userDropdown.classList.add('hidden');
             }
         }
-        
+
         // Modal controls
         loginBtn.addEventListener('click', (e) => {
             e.preventDefault();
             loginModal.classList.remove('hidden');
         });
-        
+
         mobileLoginBtn.addEventListener('click', (e) => {
             e.preventDefault();
             loginModal.classList.remove('hidden');
             mobileMenu.classList.add('hidden');
         });
-        
+
         registerBtn.addEventListener('click', (e) => {
             e.preventDefault();
             registerModal.classList.remove('hidden');
         });
-        
+
         mobileRegisterBtn.addEventListener('click', (e) => {
             e.preventDefault();
             registerModal.classList.remove('hidden');
             mobileMenu.classList.add('hidden');
         });
-        
+
         accountSettingsBtn.addEventListener('click', (e) => {
             e.preventDefault();
             accountSettingsModal.classList.remove('hidden');
@@ -715,31 +805,31 @@
             document.getElementById('accountEmail').value = currentUser.email;
             currentProfilePic.src = currentUser.profilePic || 'https://via.placeholder.com/120';
         });
-        
+
         closeLoginModal.addEventListener('click', () => {
             loginModal.classList.add('hidden');
         });
-        
+
         closeRegisterModal.addEventListener('click', () => {
             registerModal.classList.add('hidden');
         });
-        
+
         closeAccountSettingsModal.addEventListener('click', () => {
             accountSettingsModal.classList.add('hidden');
         });
-        
+
         showRegisterFromLogin.addEventListener('click', (e) => {
             e.preventDefault();
             loginModal.classList.add('hidden');
             registerModal.classList.remove('hidden');
         });
-        
+
         showLoginFromRegister.addEventListener('click', (e) => {
             e.preventDefault();
             registerModal.classList.add('hidden');
             loginModal.classList.remove('hidden');
         });
-        
+
         // Close modals when clicking outside
         window.addEventListener('click', (e) => {
             if (e.target === loginModal) loginModal.classList.add('hidden');
@@ -747,19 +837,19 @@
             if (e.target === notePreviewModal) notePreviewModal.classList.add('hidden');
             if (e.target === accountSettingsModal) accountSettingsModal.classList.add('hidden');
         });
-        
+
         // Login form submission
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
-            
-            const users = JSON.parse(localStorage.getItem('users'));
+
+            const users = await getAllUsers();
             const user = users.find(u => u.email === email && u.password === password);
-            
+
             if (user) {
                 currentUser = user;
-                localStorage.setItem('currentUser', JSON.stringify(user));
+                await putUser({ id: 'currentUser', ...user });
                 updateAuthUI();
                 loginModal.classList.add('hidden');
                 showToast('Login successful!');
@@ -767,27 +857,27 @@
                 showToast('Invalid email or password', 'error');
             }
         });
-        
+
         // Register form submission
-        registerForm.addEventListener('submit', (e) => {
+        registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('registerName').value;
             const email = document.getElementById('registerEmail').value;
             const password = document.getElementById('registerPassword').value;
             const confirmPassword = document.getElementById('registerConfirmPassword').value;
-            
+
             if (password !== confirmPassword) {
                 showToast('Passwords do not match', 'error');
                 return;
             }
-            
-            const users = JSON.parse(localStorage.getItem('users'));
-            
+
+            const users = await getAllUsers();
+
             if (users.some(u => u.email === email)) {
                 showToast('Email already registered', 'error');
                 return;
             }
-            
+
             const newUser = {
                 id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
                 name,
@@ -795,69 +885,67 @@
                 password,
                 profilePic: 'https://via.placeholder.com/30'
             };
-            
-            users.push(newUser);
-            localStorage.setItem('users', JSON.stringify(users));
-            
+
+            await putUser(newUser);
             currentUser = newUser;
-            localStorage.setItem('currentUser', JSON.stringify(newUser));
+            await putUser({ id: 'currentUser', ...newUser });
             updateAuthUI();
             registerModal.classList.add('hidden');
             showToast('Registration successful!');
         });
-        
+
         // Account settings form submission
-        accountSettingsForm.addEventListener('submit', (e) => {
+        accountSettingsForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('accountName').value;
             const email = document.getElementById('accountEmail').value;
             const password = document.getElementById('accountPassword').value;
-            
-            const users = JSON.parse(localStorage.getItem('users'));
+
+            const users = await getAllUsers();
             const userIndex = users.findIndex(u => u.id === currentUser.id);
-            
+
             if (userIndex !== -1) {
                 if (users.some(u => u.email === email && u.id !== currentUser.id)) {
                     showToast('Email already in use', 'error');
                     return;
                 }
-                
+
                 users[userIndex].name = name;
                 users[userIndex].email = email;
                 if (password) users[userIndex].password = password;
-                
-                localStorage.setItem('users', JSON.stringify(users));
+
+                await putUser(users[userIndex]);
                 currentUser = users[userIndex];
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                await putUser({ id: 'currentUser', ...currentUser });
                 updateAuthUI();
                 accountSettingsModal.classList.add('hidden');
                 showToast('Profile updated successfully!');
             }
         });
-        
+
         // Profile picture upload
-        profilePicUpload.addEventListener('change', (e) => {
+        profilePicUpload.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (file) {
                 if (!file.type.startsWith('image/')) {
                     showToast('Please upload an image file', 'error');
                     return;
                 }
-                
+
                 if (file.size > 5 * 1024 * 1024) { // 5MB limit
                     showToast('Image size exceeds 5MB limit', 'error');
                     return;
                 }
-                
+
                 const reader = new FileReader();
-                reader.onload = (e) => {
-                    const users = JSON.parse(localStorage.getItem('users'));
+                reader.onload = async (e) => {
+                    const users = await getAllUsers();
                     const userIndex = users.findIndex(u => u.id === currentUser.id);
                     if (userIndex !== -1) {
                         users[userIndex].profilePic = e.target.result;
-                        localStorage.setItem('users', JSON.stringify(users));
+                        await putUser(users[userIndex]);
                         currentUser.profilePic = e.target.result;
-                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        await putUser({ id: 'currentUser', ...currentUser });
                         currentProfilePic.src = e.target.result;
                         userProfilePic.src = e.target.result;
                         showToast('Profile picture updated!');
@@ -866,7 +954,7 @@
                 reader.readAsDataURL(file);
             }
         });
-        
+
         // PDF upload handling
         pdfUpload.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -875,15 +963,15 @@
                     showToast('Please upload a PDF file', 'error');
                     return;
                 }
-                
+
                 if (file.size > 10 * 1024 * 1024) {
                     showToast('File size exceeds 10MB limit', 'error');
                     return;
                 }
-                
+
                 fileName.textContent = file.name;
                 pdfPreview.classList.add('has-file');
-                
+
                 let progress = 0;
                 const progressInterval = setInterval(() => {
                     progress += 10;
@@ -892,40 +980,40 @@
                 }, 100);
             }
         });
-        
+
         // Drag and drop for PDF upload
         pdfPreview.addEventListener('dragover', (e) => {
             e.preventDefault();
             pdfPreview.classList.add('bg-blue-50');
         });
-        
+
         pdfPreview.addEventListener('dragleave', () => {
             pdfPreview.classList.remove('bg-blue-50');
         });
-        
+
         pdfPreview.addEventListener('drop', (e) => {
             e.preventDefault();
             pdfPreview.classList.remove('bg-blue-50');
-            
+
             const file = e.dataTransfer.files[0];
             if (file) {
                 if (file.type !== 'application/pdf') {
                     showToast('Please upload a PDF file', 'error');
                     return;
                 }
-                
+
                 if (file.size > 10 * 1024 * 1024) {
                     showToast('File size exceeds 10MB limit', 'error');
                     return;
                 }
-                
+
                 const dataTransfer = new DataTransfer();
                 dataTransfer.items.add(file);
                 pdfUpload.files = dataTransfer.files;
-                
+
                 fileName.textContent = file.name;
                 pdfPreview.classList.add('has-file');
-                
+
                 let progress = 0;
                 const progressInterval = setInterval(() => {
                     progress += 10;
@@ -934,30 +1022,30 @@
                 }, 100);
             }
         });
-        
+
         // Upload form submission
-        uploadForm.addEventListener('submit', (e) => {
+        uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             if (!currentUser) {
                 showToast('Please login to upload notes', 'error');
                 loginModal.classList.remove('hidden');
                 return;
             }
-            
+
             const title = document.getElementById('noteTitle').value;
             const subject = document.getElementById('noteSubject').value;
             const description = document.getElementById('noteDescription').value;
             const file = pdfUpload.files[0];
-            
+
             if (!file) {
                 showToast('Please select a PDF file', 'error');
                 return;
             }
-            
+
             const reader = new FileReader();
-            reader.onload = (e) => {
-                const notes = JSON.parse(localStorage.getItem('notes'));
+            reader.onload = async (e) => {
+                const notes = await getAllNotes();
                 const newNote = {
                     id: notes.length > 0 ? Math.max(...notes.map(n => n.id)) + 1 : 1,
                     title,
@@ -972,36 +1060,90 @@
                     rating: 0,
                     fileData: e.target.result
                 };
-                
-                notes.push(newNote);
-                localStorage.setItem('notes', JSON.stringify(notes));
-                
+
+                await putNote(newNote);
+
                 uploadForm.reset();
                 pdfPreview.classList.remove('has-file');
                 fileName.textContent = '';
                 document.querySelector('.progress-bar').style.width = '0%';
-                
+
                 renderNotes();
                 updateStats();
                 showToast('Notes uploaded successfully!');
-                
+
                 document.querySelector('#browse').scrollIntoView({ behavior: 'smooth' });
             };
             reader.readAsDataURL(file);
         });
-        
+
+        // Export notes
+        exportNotesBtn.addEventListener('click', async () => {
+            const notes = await getAllNotes();
+            const exportData = JSON.stringify(notes, null, 2);
+            const blob = new Blob([exportData], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'studyshare_notes.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            showToast('Notes exported successfully!');
+        });
+
+        // Import notes
+        importNotesInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.type !== 'application/json') {
+                    showToast('Please upload a JSON file', 'error');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const importedNotes = JSON.parse(e.target.result);
+                        if (!Array.isArray(importedNotes)) {
+                            showToast('Invalid notes format', 'error');
+                            return;
+                        }
+
+                        const tx = db.transaction('notes', 'readwrite');
+                        const store = tx.objectStore('notes');
+                        for (const note of importedNotes) {
+                            // Validate note structure
+                            if (note.id && note.title && note.subject && note.filename) {
+                                await store.put(note);
+                            }
+                        }
+                        await tx.complete;
+
+                        renderNotes();
+                        updateStats();
+                        showToast('Notes imported successfully!');
+                    } catch (err) {
+                        showToast('Error importing notes', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
         // Search and filter setup
         function setupSearchAndFilter() {
             const debouncedRender = debounce(() => {
                 currentPage = 1;
                 renderNotes();
             }, 300);
-            
+
             searchInput.addEventListener('input', debouncedRender);
             subjectFilter.addEventListener('change', debouncedRender);
             sortFilter.addEventListener('change', debouncedRender);
         }
-        
+
         // Debounce function
         function debounce(func, wait) {
             let timeout;
@@ -1014,16 +1156,16 @@
                 timeout = setTimeout(later, wait);
             };
         }
-        
+
         // Render notes with pagination
-        function renderNotes() {
-            let notes = JSON.parse(localStorage.getItem('notes'));
-            
+        async function renderNotes() {
+            let notes = await getAllNotes();
+
             // Apply filters
             const searchTerm = searchInput.value.toLowerCase();
             const selectedSubject = subjectFilter.value;
             const sortOption = sortFilter.value;
-            
+
             // Filter notes
             notes = notes.filter(note => {
                 const matchesSearch = note.title.toLowerCase().includes(searchTerm) ||
@@ -1032,19 +1174,19 @@
                 const matchesSubject = !selectedSubject || note.subject === selectedSubject;
                 return matchesSearch && matchesSubject;
             });
-            
+
             // Sort notes
             notes.sort((a, b) => {
                 if (sortOption === 'downloads') return b.downloads - a.downloads;
                 if (sortOption === 'rating') return b.rating - a.rating;
                 return new Date(b.uploadDate) - new Date(a.uploadDate);
             });
-            
+
             // Pagination
             const totalPages = Math.ceil(notes.length / notesPerPage);
             const startIndex = (currentPage - 1) * notesPerPage;
             const paginatedNotes = notes.slice(startIndex, startIndex + notesPerPage);
-            
+
             // Render notes
             notesGrid.innerHTML = '';
             paginatedNotes.forEach(note => {
@@ -1071,7 +1213,7 @@
                 `;
                 notesGrid.appendChild(noteCard);
             });
-            
+
             // Render pagination
             pagination.innerHTML = '';
             if (totalPages > 0) {
@@ -1081,7 +1223,7 @@
                 }
                 pagination.innerHTML += `<a href="#" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}" data-page="next">Next</a>`;
             }
-            
+
             // Add event listeners to pagination buttons
             document.querySelectorAll('#pagination a').forEach(btn => {
                 btn.addEventListener('click', (e) => {
@@ -1097,7 +1239,7 @@
                     renderNotes();
                 });
             });
-            
+
             // Add event listeners to view buttons
             document.querySelectorAll('.view-note-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -1106,16 +1248,16 @@
                 });
             });
         }
-        
+
         // View note details
-        function viewNote(id) {
-            const notes = JSON.parse(localStorage.getItem('notes'));
+        async function viewNote(id) {
+            const notes = await getAllNotes();
             const note = notes.find(n => n.id === id);
-            
+
             if (note) {
-                const users = JSON.parse(localStorage.getItem('users'));
+                const users = await getAllUsers();
                 const author = users.find(u => u.id === note.authorId);
-                
+
                 document.getElementById('previewNoteTitle').textContent = note.title;
                 document.getElementById('previewNoteAuthor').textContent = `By ${note.author}`;
                 document.getElementById('previewNoteDate').textContent = `Uploaded on ${note.uploadDate}`;
@@ -1126,27 +1268,27 @@
                 document.getElementById('previewNoteDownloads').textContent = note.downloads;
                 document.getElementById('previewNoteUploadDate').textContent = note.uploadDate;
                 previewNoteAuthorPic.src = author ? author.profilePic : 'https://via.placeholder.com/40';
-                
+
                 downloadNoteBtn.setAttribute('data-id', note.id);
                 notePreviewModal.classList.remove('hidden');
             }
         }
-        
+
         // Download note
-        downloadNoteBtn.addEventListener('click', () => {
+        downloadNoteBtn.addEventListener('click', async () => {
             const noteId = parseInt(downloadNoteBtn.getAttribute('data-id'));
-            const notes = JSON.parse(localStorage.getItem('notes'));
+            const notes = await getAllNotes();
             const noteIndex = notes.findIndex(n => n.id === noteId);
-            
+
             if (noteIndex !== -1) {
                 if (!notes[noteIndex].fileData) {
                     showToast('No file data available for download', 'error');
                     return;
                 }
-                
+
                 notes[noteIndex].downloads += 1;
-                localStorage.setItem('notes', JSON.stringify(notes));
-                
+                await putNote(notes[noteIndex]);
+
                 // Convert base64 to blob and trigger download
                 const byteString = atob(notes[noteIndex].fileData.split(',')[1]);
                 const mimeString = notes[noteIndex].fileData.split(',')[0].split(':')[1].split(';')[0];
@@ -1156,7 +1298,7 @@
                     ia[i] = byteString.charCodeAt(i);
                 }
                 const blob = new Blob([ab], { type: mimeString });
-                
+
                 const link = document.createElement('a');
                 link.href = window.URL.createObjectURL(blob);
                 link.download = notes[noteIndex].filename;
@@ -1164,47 +1306,50 @@
                 link.click();
                 document.body.removeChild(link);
                 window.URL.revokeObjectURL(link.href);
-                
+
                 renderNotes();
                 updateStats();
                 showToast('Download started!');
-                
+
                 setTimeout(() => {
                     notePreviewModal.classList.add('hidden');
                 }, 1000);
             }
         });
-        
+
         // Close preview modal
         closePreviewModal.addEventListener('click', () => {
             notePreviewModal.classList.add('hidden');
         });
-        
+
         // Logout
-        logoutBtn.addEventListener('click', (e) => {
+        logoutBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             currentUser = null;
-            localStorage.removeItem('currentUser');
+            const tx = db.transaction('users', 'readwrite');
+            const store = tx.objectStore('users');
+            await store.delete('currentUser');
+            await tx.complete;
             updateAuthUI();
             showToast('Logged out successfully');
         });
-        
+
         // Update stats
-        function updateStats() {
-            const notes = JSON.parse(localStorage.getItem('notes'));
-            const users = JSON.parse(localStorage.getItem('users'));
-            
+        async function updateStats() {
+            const notes = await getAllNotes();
+            const users = await getAllUsers();
+
             const totalDownloads = notes.reduce((sum, note) => sum + note.downloads, 0);
-            
+
             document.getElementById('totalNotes').textContent = notes.length.toLocaleString();
             document.getElementById('totalUsers').textContent = users.length.toLocaleString();
             document.getElementById('totalDownloads').textContent = totalDownloads.toLocaleString();
         }
-        
+
         // Show toast notification
         function showToast(message, type = 'success') {
             toastMessage.textContent = message;
-            
+
             if (type === 'error') {
                 successToast.classList.remove('bg-green-500');
                 successToast.classList.add('bg-red-500');
@@ -1212,10 +1357,10 @@
                 successToast.classList.remove('bg-red-500');
                 successToast.classList.add('bg-green-500');
             }
-            
+
             successToast.classList.remove('translate-y-10', 'opacity-0');
             successToast.classList.add('translate-y-0', 'opacity-100');
-            
+
             setTimeout(() => {
                 successToast.classList.remove('translate-y-0', 'opacity-100');
                 successToast.classList.add('translate-y-10', 'opacity-0');
