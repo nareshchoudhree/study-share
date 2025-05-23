@@ -7,44 +7,17 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .pdf-icon {
-            color: #e74c3c;
-        }
-        .dropdown:hover .dropdown-menu {
-            display: block;
-        }
-        .file-upload {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-        }
-        .file-upload input[type="file"] {
-            position: absolute;
-            left: 0;
-            top: 0;
-            opacity: 0;
-        }
-        .pdf-preview {
-            border: 2px dashed #ddd;
-            min-height: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-        .pdf-preview.has-file {
-            border-color: #4CAF50;
-        }
-        .note-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        .progress-bar {
-            height: 5px;
-            background-color: #4CAF50;
-            width: 0%;
-            transition: width 0.3s;
-        }
+        .pdf-icon { color: #e74c3c; }
+        .dropdown:hover .dropdown-menu { display: block; }
+        .file-upload { position: relative; overflow: hidden; display: inline-block; }
+        .file-upload input[type="file"] { position: absolute; left: 0; top: 0; opacity: 0; }
+        .pdf-preview { border: 2px dashed #ddd; min-height: 200px; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .pdf-preview.has-file { border-color: #4CAF50; }
+        .note-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .progress-bar { height: 5px; background-color: #4CAF50; width: 0%; transition: width 0.3s; }
+        .profile-upload { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; }
+        .user-profile-pic { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+        .author-profile-pic { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -71,13 +44,13 @@
                     <a href="#" id="registerBtn" class="py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-300">Register</a>
                     <div class="dropdown relative hidden" id="userDropdown">
                         <button class="flex items-center space-x-2 focus:outline-none">
-                            <img src="https://via.placeholder.com/30" alt="User" class="rounded-full">
+                            <img id="userProfilePic" src="https://via.placeholder.com/30" alt="User" class="user-profile-pic">
                             <span id="usernameDisplay" class="font-medium"></span>
                             <i class="fas fa-chevron-down text-xs"></i>
                         </button>
                         <div class="dropdown-menu absolute hidden right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Notes</a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Account Settings</a>
+                            <a href="#" id="accountSettingsBtn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Account Settings</a>
                             <a href="#" id="logoutBtn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
                         </div>
                     </div>
@@ -114,7 +87,7 @@
                     </div>
                 </div>
                 <div class="md:w-1/2">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3132/3132693.png" alt="Students studying" class="w-full max-w-md mx-auto">
+                    <img src="https://static.vecteezy.com/system/resources/previews/020/693/387/original/notebooks-school-free-png.png" alt="Students studying" class="w-full max-w-md mx-auto">
                 </div>
             </div>
         </div>
@@ -149,22 +122,21 @@
             <div class="mb-8 bg-white p-6 rounded-lg shadow-md">
                 <div class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
                     <div class="flex-1">
-                        <input type="text" placeholder="Search notes by subject, course, or keyword..." class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="searchInput" placeholder="Search notes by subject, course, or keyword..." class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div class="flex space-x-2">
-                        <select class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option>All Subjects</option>
+                        <select id="subjectFilter" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Subjects</option>
                             <option>Mathematics</option>
                             <option>Science</option>
                             <option>Engineering</option>
                             <option>Business</option>
                             <option>Arts</option>
                         </select>
-                        <select class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option>Sort By</option>
-                            <option>Most Recent</option>
-                            <option>Most Downloaded</option>
-                            <option>Highest Rated</option>
+                        <select id="sortFilter" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="recent">Most Recent</option>
+                            <option value="downloads">Most Downloaded</option>
+                            <option value="rating">Highest Rated</option>
                         </select>
                     </div>
                 </div>
@@ -177,7 +149,7 @@
             
             <!-- Pagination -->
             <div class="mt-12 flex justify-center">
-                <nav class="inline-flex rounded-md shadow">
+                <nav class="inline-flex rounded-md shadow" id="pagination">
                     <a href="#" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">Previous</a>
                     <a href="#" class="px-3 py-2 border-t border-b border-gray-300 bg-blue-600 text-white">1</a>
                     <a href="#" class="px-3 py-2 border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">2</a>
@@ -252,6 +224,44 @@
             </div>
         </div>
     </section>
+
+    <!-- Account Settings Modal -->
+    <div id="accountSettingsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg w-full max-w-md">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold">Account Settings</h3>
+                    <button id="closeAccountSettingsModal" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="accountSettingsForm">
+                    <div class="mb-6 text-center">
+                        <img id="currentProfilePic" src="https://via.placeholder.com/120" alt="Profile" class="profile-upload mx-auto mb-4">
+                        <div class="file-upload">
+                            <input type="file" id="profilePicUpload" accept="image/*" class="hidden">
+                            <label for="profilePicUpload" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg cursor-pointer">Change Profile Picture</label>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2" for="accountName">Full Name</label>
+                        <input type="text" id="accountName" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2" for="accountEmail">Email</label>
+                        <input type="email" id="accountEmail" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2" for="accountPassword">New Password (optional)</label>
+                        <input type="password" id="accountPassword" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- About Section -->
     <section id="about" class="py-16 bg-gray-50">
@@ -343,7 +353,7 @@
                 </div>
             </div>
             <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-                <p>&copy; 2023 StudyShare. All rights reserved.</p>
+                <p>© 2023 StudyShare. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -436,7 +446,7 @@
                     </button>
                 </div>
                 <div class="flex items-center mb-6">
-                    <img src="https://via.placeholder.com/40" alt="Author" class="rounded-full mr-3">
+                    <img id="previewNoteAuthorPic" src="https://via.placeholder.com/40" alt="Author" class="author-profile-pic mr-3">
                     <div>
                         <p id="previewNoteAuthor" class="font-medium"></p>
                         <p id="previewNoteDate" class="text-sm text-gray-500"></p>
@@ -514,7 +524,8 @@
                     downloads: 124,
                     author: "John Doe",
                     authorId: 1,
-                    rating: 4.5
+                    rating: 4.5,
+                    fileData: null
                 },
                 {
                     id: 2,
@@ -527,7 +538,8 @@
                     downloads: 89,
                     author: "Jane Smith",
                     authorId: 2,
-                    rating: 4.2
+                    rating: 4.2,
+                    fileData: null
                 },
                 {
                     id: 3,
@@ -540,7 +552,8 @@
                     downloads: 156,
                     author: "Robert Johnson",
                     authorId: 3,
-                    rating: 4.7
+                    rating: 4.7,
+                    fileData: null
                 },
                 {
                     id: 4,
@@ -553,7 +566,8 @@
                     downloads: 67,
                     author: "Emily Davis",
                     authorId: 4,
-                    rating: 4.0
+                    rating: 4.0,
+                    fileData: null
                 },
                 {
                     id: 5,
@@ -566,7 +580,8 @@
                     downloads: 112,
                     author: "Michael Brown",
                     authorId: 5,
-                    rating: 4.3
+                    rating: 4.3,
+                    fileData: null
                 },
                 {
                     id: 6,
@@ -579,7 +594,8 @@
                     downloads: 94,
                     author: "Sarah Wilson",
                     authorId: 6,
-                    rating: 4.4
+                    rating: 4.4,
+                    fileData: null
                 }
             ];
             localStorage.setItem('notes', JSON.stringify(sampleNotes));
@@ -587,6 +603,8 @@
         
         // Current user state
         let currentUser = null;
+        let currentPage = 1;
+        const notesPerPage = 6;
         
         // DOM Elements
         const loginBtn = document.getElementById('loginBtn');
@@ -596,16 +614,22 @@
         const logoutBtn = document.getElementById('logoutBtn');
         const userDropdown = document.getElementById('userDropdown');
         const usernameDisplay = document.getElementById('usernameDisplay');
+        const userProfilePic = document.getElementById('userProfilePic');
         const loginModal = document.getElementById('loginModal');
         const registerModal = document.getElementById('registerModal');
+        const accountSettingsModal = document.getElementById('accountSettingsModal');
         const closeLoginModal = document.getElementById('closeLoginModal');
         const closeRegisterModal = document.getElementById('closeRegisterModal');
+        const closeAccountSettingsModal = document.getElementById('closeAccountSettingsModal');
         const showRegisterFromLogin = document.getElementById('showRegisterFromLogin');
         const showLoginFromRegister = document.getElementById('showLoginFromRegister');
+        const accountSettingsBtn = document.getElementById('accountSettingsBtn');
         const loginForm = document.getElementById('loginForm');
         const registerForm = document.getElementById('registerForm');
+        const accountSettingsForm = document.getElementById('accountSettingsForm');
         const uploadForm = document.getElementById('uploadForm');
         const pdfUpload = document.getElementById('pdfUpload');
+        const profilePicUpload = document.getElementById('profilePicUpload');
         const pdfPreview = document.querySelector('.pdf-preview');
         const fileName = document.getElementById('fileName');
         const notesGrid = document.getElementById('notesGrid');
@@ -614,6 +638,12 @@
         const downloadNoteBtn = document.getElementById('downloadNoteBtn');
         const successToast = document.getElementById('successToast');
         const toastMessage = document.getElementById('toastMessage');
+        const searchInput = document.getElementById('searchInput');
+        const subjectFilter = document.getElementById('subjectFilter');
+        const sortFilter = document.getElementById('sortFilter');
+        const pagination = document.getElementById('pagination');
+        const currentProfilePic = document.getElementById('currentProfilePic');
+        const previewNoteAuthorPic = document.getElementById('previewNoteAuthorPic');
         
         // Mobile menu toggle
         const mobileMenuButton = document.querySelector('.mobile-menu-button');
@@ -633,6 +663,7 @@
             
             renderNotes();
             updateStats();
+            setupSearchAndFilter();
         });
         
         // Update authentication UI
@@ -644,6 +675,7 @@
                 mobileRegisterBtn.classList.add('hidden');
                 userDropdown.classList.remove('hidden');
                 usernameDisplay.textContent = currentUser.name.split(' ')[0];
+                userProfilePic.src = currentUser.profilePic || 'https://via.placeholder.com/30';
             } else {
                 loginBtn.classList.remove('hidden');
                 registerBtn.classList.remove('hidden');
@@ -676,12 +708,24 @@
             mobileMenu.classList.add('hidden');
         });
         
+        accountSettingsBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            accountSettingsModal.classList.remove('hidden');
+            document.getElementById('accountName').value = currentUser.name;
+            document.getElementById('accountEmail').value = currentUser.email;
+            currentProfilePic.src = currentUser.profilePic || 'https://via.placeholder.com/120';
+        });
+        
         closeLoginModal.addEventListener('click', () => {
             loginModal.classList.add('hidden');
         });
         
         closeRegisterModal.addEventListener('click', () => {
             registerModal.classList.add('hidden');
+        });
+        
+        closeAccountSettingsModal.addEventListener('click', () => {
+            accountSettingsModal.classList.add('hidden');
         });
         
         showRegisterFromLogin.addEventListener('click', (e) => {
@@ -698,15 +742,10 @@
         
         // Close modals when clicking outside
         window.addEventListener('click', (e) => {
-            if (e.target === loginModal) {
-                loginModal.classList.add('hidden');
-            }
-            if (e.target === registerModal) {
-                registerModal.classList.add('hidden');
-            }
-            if (e.target === notePreviewModal) {
-                notePreviewModal.classList.add('hidden');
-            }
+            if (e.target === loginModal) loginModal.classList.add('hidden');
+            if (e.target === registerModal) registerModal.classList.add('hidden');
+            if (e.target === notePreviewModal) notePreviewModal.classList.add('hidden');
+            if (e.target === accountSettingsModal) accountSettingsModal.classList.add('hidden');
         });
         
         // Login form submission
@@ -744,24 +783,22 @@
             
             const users = JSON.parse(localStorage.getItem('users'));
             
-            // Check if user already exists
             if (users.some(u => u.email === email)) {
                 showToast('Email already registered', 'error');
                 return;
             }
             
-            // Create new user
             const newUser = {
                 id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
                 name,
                 email,
-                password
+                password,
+                profilePic: 'https://via.placeholder.com/30'
             };
             
             users.push(newUser);
             localStorage.setItem('users', JSON.stringify(users));
             
-            // Log in the new user
             currentUser = newUser;
             localStorage.setItem('currentUser', JSON.stringify(newUser));
             updateAuthUI();
@@ -769,13 +806,65 @@
             showToast('Registration successful!');
         });
         
-        // Logout
-        logoutBtn.addEventListener('click', (e) => {
+        // Account settings form submission
+        accountSettingsForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            currentUser = null;
-            localStorage.removeItem('currentUser');
-            updateAuthUI();
-            showToast('Logged out successfully');
+            const name = document.getElementById('accountName').value;
+            const email = document.getElementById('accountEmail').value;
+            const password = document.getElementById('accountPassword').value;
+            
+            const users = JSON.parse(localStorage.getItem('users'));
+            const userIndex = users.findIndex(u => u.id === currentUser.id);
+            
+            if (userIndex !== -1) {
+                if (users.some(u => u.email === email && u.id !== currentUser.id)) {
+                    showToast('Email already in use', 'error');
+                    return;
+                }
+                
+                users[userIndex].name = name;
+                users[userIndex].email = email;
+                if (password) users[userIndex].password = password;
+                
+                localStorage.setItem('users', JSON.stringify(users));
+                currentUser = users[userIndex];
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                updateAuthUI();
+                accountSettingsModal.classList.add('hidden');
+                showToast('Profile updated successfully!');
+            }
+        });
+        
+        // Profile picture upload
+        profilePicUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                if (!file.type.startsWith('image/')) {
+                    showToast('Please upload an image file', 'error');
+                    return;
+                }
+                
+                if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                    showToast('Image size exceeds 5MB limit', 'error');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const users = JSON.parse(localStorage.getItem('users'));
+                    const userIndex = users.findIndex(u => u.id === currentUser.id);
+                    if (userIndex !== -1) {
+                        users[userIndex].profilePic = e.target.result;
+                        localStorage.setItem('users', JSON.stringify(users));
+                        currentUser.profilePic = e.target.result;
+                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        currentProfilePic.src = e.target.result;
+                        userProfilePic.src = e.target.result;
+                        showToast('Profile picture updated!');
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
         });
         
         // PDF upload handling
@@ -787,7 +876,7 @@
                     return;
                 }
                 
-                if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                if (file.size > 10 * 1024 * 1024) {
                     showToast('File size exceeds 10MB limit', 'error');
                     return;
                 }
@@ -795,15 +884,11 @@
                 fileName.textContent = file.name;
                 pdfPreview.classList.add('has-file');
                 
-                // Simulate upload progress
                 let progress = 0;
                 const progressInterval = setInterval(() => {
                     progress += 10;
                     document.querySelector('.progress-bar').style.width = `${progress}%`;
-                    
-                    if (progress >= 100) {
-                        clearInterval(progressInterval);
-                    }
+                    if (progress >= 100) clearInterval(progressInterval);
                 }, 100);
             }
         });
@@ -829,12 +914,11 @@
                     return;
                 }
                 
-                if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                if (file.size > 10 * 1024 * 1024) {
                     showToast('File size exceeds 10MB limit', 'error');
                     return;
                 }
                 
-                // Set the file to the input
                 const dataTransfer = new DataTransfer();
                 dataTransfer.items.add(file);
                 pdfUpload.files = dataTransfer.files;
@@ -842,15 +926,11 @@
                 fileName.textContent = file.name;
                 pdfPreview.classList.add('has-file');
                 
-                // Simulate upload progress
                 let progress = 0;
                 const progressInterval = setInterval(() => {
                     progress += 10;
                     document.querySelector('.progress-bar').style.width = `${progress}%`;
-                    
-                    if (progress >= 100) {
-                        clearInterval(progressInterval);
-                    }
+                    if (progress >= 100) clearInterval(progressInterval);
                 }, 100);
             }
         });
@@ -875,46 +955,99 @@
                 return;
             }
             
-            // Create new note
-            const notes = JSON.parse(localStorage.getItem('notes'));
-            const newNote = {
-                id: notes.length > 0 ? Math.max(...notes.map(n => n.id)) + 1 : 1,
-                title,
-                subject,
-                description,
-                filename: file.name,
-                filesize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-                uploadDate: new Date().toISOString().split('T')[0],
-                downloads: 0,
-                author: currentUser.name,
-                authorId: currentUser.id,
-                rating: 0
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const notes = JSON.parse(localStorage.getItem('notes'));
+                const newNote = {
+                    id: notes.length > 0 ? Math.max(...notes.map(n => n.id)) + 1 : 1,
+                    title,
+                    subject,
+                    description,
+                    filename: file.name,
+                    filesize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+                    uploadDate: new Date().toISOString().split('T')[0],
+                    downloads: 0,
+                    author: currentUser.name,
+                    authorId: currentUser.id,
+                    rating: 0,
+                    fileData: e.target.result
+                };
+                
+                notes.push(newNote);
+                localStorage.setItem('notes', JSON.stringify(notes));
+                
+                uploadForm.reset();
+                pdfPreview.classList.remove('has-file');
+                fileName.textContent = '';
+                document.querySelector('.progress-bar').style.width = '0%';
+                
+                renderNotes();
+                updateStats();
+                showToast('Notes uploaded successfully!');
+                
+                document.querySelector('#browse').scrollIntoView({ behavior: 'smooth' });
             };
-            
-            notes.push(newNote);
-            localStorage.setItem('notes', JSON.stringify(notes));
-            
-            // Reset form
-            uploadForm.reset();
-            pdfPreview.classList.remove('has-file');
-            fileName.textContent = '';
-            document.querySelector('.progress-bar').style.width = '0%';
-            
-            // Update UI
-            renderNotes();
-            updateStats();
-            showToast('Notes uploaded successfully!');
-            
-            // Scroll to browse section
-            document.querySelector('#browse').scrollIntoView({ behavior: 'smooth' });
+            reader.readAsDataURL(file);
         });
         
-        // Render notes in the grid
-        function renderNotes() {
-            const notes = JSON.parse(localStorage.getItem('notes'));
-            notesGrid.innerHTML = '';
+        // Search and filter setup
+        function setupSearchAndFilter() {
+            const debouncedRender = debounce(() => {
+                currentPage = 1;
+                renderNotes();
+            }, 300);
             
-            notes.forEach(note => {
+            searchInput.addEventListener('input', debouncedRender);
+            subjectFilter.addEventListener('change', debouncedRender);
+            sortFilter.addEventListener('change', debouncedRender);
+        }
+        
+        // Debounce function
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        // Render notes with pagination
+        function renderNotes() {
+            let notes = JSON.parse(localStorage.getItem('notes'));
+            
+            // Apply filters
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedSubject = subjectFilter.value;
+            const sortOption = sortFilter.value;
+            
+            // Filter notes
+            notes = notes.filter(note => {
+                const matchesSearch = note.title.toLowerCase().includes(searchTerm) ||
+                    note.subject.toLowerCase().includes(searchTerm) ||
+                    note.description.toLowerCase().includes(searchTerm);
+                const matchesSubject = !selectedSubject || note.subject === selectedSubject;
+                return matchesSearch && matchesSubject;
+            });
+            
+            // Sort notes
+            notes.sort((a, b) => {
+                if (sortOption === 'downloads') return b.downloads - a.downloads;
+                if (sortOption === 'rating') return b.rating - a.rating;
+                return new Date(b.uploadDate) - new Date(a.uploadDate);
+            });
+            
+            // Pagination
+            const totalPages = Math.ceil(notes.length / notesPerPage);
+            const startIndex = (currentPage - 1) * notesPerPage;
+            const paginatedNotes = notes.slice(startIndex, startIndex + notesPerPage);
+            
+            // Render notes
+            notesGrid.innerHTML = '';
+            paginatedNotes.forEach(note => {
                 const noteCard = document.createElement('div');
                 noteCard.className = 'bg-white rounded-lg shadow-md overflow-hidden note-card transition duration-300';
                 noteCard.innerHTML = `
@@ -939,6 +1072,32 @@
                 notesGrid.appendChild(noteCard);
             });
             
+            // Render pagination
+            pagination.innerHTML = '';
+            if (totalPages > 0) {
+                pagination.innerHTML += `<a href="#" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}" data-page="prev">Previous</a>`;
+                for (let i = 1; i <= totalPages; i++) {
+                    pagination.innerHTML += `<a href="#" class="px-3 py-2 border border-gray-300 ${i === currentPage ? 'bg-blue-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}" data-page="${i}">${i}</a>`;
+                }
+                pagination.innerHTML += `<a href="#" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}" data-page="next">Next</a>`;
+            }
+            
+            // Add event listeners to pagination buttons
+            document.querySelectorAll('#pagination a').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const page = btn.getAttribute('data-page');
+                    if (page === 'prev' && currentPage > 1) {
+                        currentPage--;
+                    } else if (page === 'next' && currentPage < totalPages) {
+                        currentPage++;
+                    } else if (!isNaN(page)) {
+                        currentPage = parseInt(page);
+                    }
+                    renderNotes();
+                });
+            });
+            
             // Add event listeners to view buttons
             document.querySelectorAll('.view-note-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -954,6 +1113,9 @@
             const note = notes.find(n => n.id === id);
             
             if (note) {
+                const users = JSON.parse(localStorage.getItem('users'));
+                const author = users.find(u => u.id === note.authorId);
+                
                 document.getElementById('previewNoteTitle').textContent = note.title;
                 document.getElementById('previewNoteAuthor').textContent = `By ${note.author}`;
                 document.getElementById('previewNoteDate').textContent = `Uploaded on ${note.uploadDate}`;
@@ -963,10 +1125,9 @@
                 document.getElementById('previewNoteSubject').textContent = note.subject;
                 document.getElementById('previewNoteDownloads').textContent = note.downloads;
                 document.getElementById('previewNoteUploadDate').textContent = note.uploadDate;
+                previewNoteAuthorPic.src = author ? author.profilePic : 'https://via.placeholder.com/40';
                 
-                // Set download button data attribute
                 downloadNoteBtn.setAttribute('data-id', note.id);
-                
                 notePreviewModal.classList.remove('hidden');
             }
         }
@@ -978,18 +1139,36 @@
             const noteIndex = notes.findIndex(n => n.id === noteId);
             
             if (noteIndex !== -1) {
-                // Increment download count
+                if (!notes[noteIndex].fileData) {
+                    showToast('No file data available for download', 'error');
+                    return;
+                }
+                
                 notes[noteIndex].downloads += 1;
                 localStorage.setItem('notes', JSON.stringify(notes));
                 
-                // Update UI
+                // Convert base64 to blob and trigger download
+                const byteString = atob(notes[noteIndex].fileData.split(',')[1]);
+                const mimeString = notes[noteIndex].fileData.split(',')[0].split(':')[1].split(';')[0];
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+                const blob = new Blob([ab], { type: mimeString });
+                
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = notes[noteIndex].filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(link.href);
+                
                 renderNotes();
                 updateStats();
-                
-                // Simulate download (in a real app, this would download the actual file)
                 showToast('Download started!');
                 
-                // Close modal after a delay
                 setTimeout(() => {
                     notePreviewModal.classList.add('hidden');
                 }, 1000);
@@ -1001,15 +1180,22 @@
             notePreviewModal.classList.add('hidden');
         });
         
+        // Logout
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            updateAuthUI();
+            showToast('Logged out successfully');
+        });
+        
         // Update stats
         function updateStats() {
             const notes = JSON.parse(localStorage.getItem('notes'));
             const users = JSON.parse(localStorage.getItem('users'));
             
-            // Calculate total downloads
             const totalDownloads = notes.reduce((sum, note) => sum + note.downloads, 0);
             
-            // Update DOM
             document.getElementById('totalNotes').textContent = notes.length.toLocaleString();
             document.getElementById('totalUsers').textContent = users.length.toLocaleString();
             document.getElementById('totalDownloads').textContent = totalDownloads.toLocaleString();
