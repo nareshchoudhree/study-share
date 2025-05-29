@@ -92,7 +92,7 @@
         </div>
         <div class="hidden mobile-menu">
             <ul>
-                <li><a href="#homeOSD" class="block text-sm px-2 py-4 hover:bg-blue-600 hover:text-white transition duration-300">Home</a></li>
+                <li><a href="#home" class="block text-sm px-2 py-4 hover:bg-blue-600 hover:text-white transition duration-300">Home</a></li>
                 <li><a href="#browse" class="block text-sm px-2 py-4 hover:bg-blue-600 hover:text-white transition duration-300">Browse Notes</a></li>
                 <li><a href="#upload" class="block text-sm px-2 py-4 hover:bg-blue-600 hover:text-white transition duration-300">Upload Notes</a></li>
                 <li><a href="#about" class="block text-sm px-2 py-4 hover:bg-blue-600 hover:text-white transition duration-300">About</a></li>
@@ -150,22 +150,21 @@
             <div class="mb-8 bg-white p-6 rounded-lg shadow-md">
                 <div class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
                     <div class="flex-1">
-                        <input type="text" placeholder="Search notes by subject, course, or keyword..." class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="searchInput" placeholder="Search notes by subject, course, or keyword..." class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div class="flex space-x-2">
-                        <select class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option>All Subjects</option>
-                            <option>Mathematics</option>
-                            <option>Science</option>
-                            <option>Engineering</option>
-                            <option>Business</option>
-                            <option>Arts</option>
+                        <select id="subjectFilter" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Subjects</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Science">Science</option>
+                            <option value="Engineering">Engineering</option>
+                            <option value="Business">Business</option>
+                            <option value="Arts">Arts</option>
                         </select>
-                        <select class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option>Sort By</option>
-                            <option>Most Recent</option>
-                            <option>Most Downloaded</option>
-                            <option>Highest Rated</option>
+                        <select id="sortFilter" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="recent">Most Recent</option>
+                            <option value="downloads">Most Downloaded</option>
+                            <option value="rating">Highest Rated</option>
                         </select>
                     </div>
                 </div>
@@ -178,12 +177,8 @@
             
             <!-- Pagination -->
             <div class="mt-12 flex justify-center">
-                <nav class="inline-flex rounded-md shadow">
-                    <a href="#" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">Previous</a>
-                    <a href="#" class="px-3 py-2 border-t border-b border-gray-300 bg-blue-600 text-white">1</a>
-                    <a href="#" class="px-3 py-2 border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">2</a>
-                    <a href="#" class="px-3 py-2 border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">3</a>
-                    <a href="#" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">Next</a>
+                <nav class="inline-flex rounded-md shadow" id="pagination">
+                    <!-- Pagination buttons will be dynamically inserted here -->
                 </nav>
             </div>
         </div>
@@ -366,7 +361,7 @@
                     </div>
                     <div class="mb-6">
                         <label class="block text-gray-700 mb-2" for="loginPassword">Password</label>
-                        <input type="password" id="loginPassword" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <input type="password" id="loginPassword" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required minlength="8">
                     </div>
                     <div class="flex items-center justify-between mb-4">
                         <label class="flex items-center">
@@ -397,7 +392,7 @@
                 <form id="registerForm">
                     <div class="mb-4">
                         <label class="block text-gray-700 mb-2" for="registerName">Full Name</label>
-                        <input type="text" id="registerName" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <input type="text" id="registerName" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required minlength="2">
                     </div>
                     <div class="mb-4">
                         <label class="block text-gray-700 mb-2" for="registerEmail">Email</label>
@@ -405,11 +400,11 @@
                     </div>
                     <div class="mb-4">
                         <label class="block text-gray-700 mb-2" for="registerPassword">Password</label>
-                        <input type="password" id="registerPassword" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <input type="password" id="registerPassword" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required minlength="8">
                     </div>
                     <div class="mb-6">
                         <label class="block text-gray-700 mb-2" for="registerConfirmPassword">Confirm Password</label>
-                        <input type="password" id="registerConfirmPassword" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <input type="password" id="registerConfirmPassword" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required minlength="8">
                     </div>
                     <div class="mb-4">
                         <label class="flex items-center">
@@ -500,21 +495,23 @@
         // Initialize Appwrite client
         const client = new Appwrite.Client();
         client
-            .setEndpoint('https://fra.cloud.appwrite.io/v1') // e.g., 'https://cloud.appwrite.io/v1'
-            .setProject('68382a3100107360bf24'); // Replace with your Appwrite project ID
+            .setEndpoint('https://fra.cloud.appwrite.io/v1') // Your Appwrite endpoint
+            .setProject('68382a3100107360bf24'); // Your project ID
 
         const account = new Appwrite.Account(client);
         const databases = new Appwrite.Databases(client);
         const storage = new Appwrite.Storage(client);
 
         // Appwrite configuration
-        const DATABASE_ID = '68382af700129c7bca60'; // Replace with your Appwrite database ID
-        const NOTES_COLLECTION_ID = '68382c2a002426c4f2d8'; // Replace with your notes collection ID
-        const USERS_COLLECTION_ID = '68382b3b00359aecee59'; // Replace with your users collection ID
-        const BUCKET_ID = '6838311100000962dbc9'; // Replace with your storage bucket ID
+        const DATABASE_ID = '68382af700129c7bca60'; // Your database ID
+        const NOTES_COLLECTION_ID = '68382c2a002426c4f2d8'; // Your notes collection ID
+        const USERS_COLLECTION_ID = '68382b3b00359aecee59'; // Corrected (removed 'Y' prefix)
+        const BUCKET_ID = '6838311100000962dbc9'; // Your storage bucket ID
+        const NOTES_PER_PAGE = 6; // Pagination limit
 
         // Current user state
         let currentUser = null;
+        let currentPage = 1;
 
         // DOM Elements
         const loginBtn = document.getElementById('loginBtn');
@@ -542,6 +539,10 @@
         const downloadNoteBtn = document.getElementById('downloadNoteBtn');
         const successToast = document.getElementById('successToast');
         const toastMessage = document.getElementById('toastMessage');
+        const searchInput = document.getElementById('searchInput');
+        const subjectFilter = document.getElementById('subjectFilter');
+        const sortFilter = document.getElementById('sortFilter');
+        const pagination = document.getElementById('pagination');
 
         // Mobile menu toggle
         const mobileMenuButton = document.querySelector('.mobile-menu-button');
@@ -556,8 +557,8 @@
             try {
                 currentUser = await account.get();
                 updateAuthUI();
-            } catch (error) {
-                console.log('No user logged in:', error);
+            } catch (e) {
+                console.log('No user logged in:', e);
             }
             await renderNotes();
             await updateStats();
@@ -584,22 +585,28 @@
         // Modal controls
         loginBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            loginModal.classList.add('flex', 'items-center', 'justify-center');
             loginModal.classList.remove('hidden');
         });
 
         mobileLoginBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            loginModal.classList.add('flex', 'items-center', 'justify-center');
             loginModal.classList.remove('hidden');
             mobileMenu.classList.add('hidden');
         });
 
         registerBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            registerModal.classList.add', 'flex');
+            registerModal.classList.add('hidden', 'items', 'justify');
+            registerModal.classList.add('flex');
             registerModal.classList.remove('hidden');
         });
 
         mobileRegisterBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            registerModal.classList.add('flex', 'items-center', 'justify-center');
             registerModal.classList.remove('hidden');
             mobileMenu.classList.add('hidden');
         });
@@ -615,12 +622,14 @@
         showRegisterFromLogin.addEventListener('click', (e) => {
             e.preventDefault();
             loginModal.classList.add('hidden');
+            registerModal.classList.add('flex', 'items-center', 'justify-center');
             registerModal.classList.remove('hidden');
         });
 
         showLoginFromRegister.addEventListener('click', (e) => {
             e.preventDefault();
             registerModal.classList.add('hidden');
+            loginModal.classList.add('flex', 'items-center', 'justify-center');
             loginModal.classList.remove('hidden');
         });
 
@@ -637,30 +646,66 @@
             }
         });
 
+        // Validate email format
+        function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
         // Login form submission
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
+            const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
+
+            if (!isValidEmail(email)) {
+                showToast('Please enter a valid email address', 'error');
+                return;
+            }
+
+            if (password.length < 8) {
+                showToast('Password must be at least 8 characters', 'error');
+                return;
+            }
 
             try {
                 await account.createEmailPasswordSession(email, password);
                 currentUser = await account.get();
                 updateAuthUI();
                 loginModal.classList.add('hidden');
+                loginForm.reset();
                 showToast('Login successful!');
             } catch (error) {
-                showToast(`Login failed: ${error.message}`, 'error');
+                let errorMessage = error.message;
+                if (error.code === 401) {
+                    errorMessage = 'Invalid email or password';
+                }
+                showToast(`Login failed: ${errorMessage}`, 'error');
             }
         });
 
         // Register form submission
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('registerName').value;
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            const name = document.getElementsById('registerName').value.trim();
+            const email = document.getElementsById('registerEmail').value.trim();
+            const password = document.getElementsById('registerPassword').value;
+            const confirmPassword = document.getElementsById('registerConfirmPassword').value;
+
+            if (!name || name.length < 2) {
+                showToast('Full name must be at least 2 characters', 'error');
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showToast('Please enter a valid email address', 'error');
+                return;
+            }
+
+            if (password.length < 8) {
+                showToast('Password must be at least 8 characters', 'error');
+                return;
+            }
 
             if (password !== confirmPassword) {
                 showToast('Passwords do not match', 'error');
@@ -668,8 +713,8 @@
             }
 
             try {
-                // Create user
-                const user = await account.create(Appwrite.ID.unique(), email, password, name);
+                // Create user account
+                const user = await account.createDocument(Appwrite.ID.unique(), email, password, name);
                 
                 // Store additional user info in database
                 await databases.createDocument(
@@ -680,6 +725,12 @@
                         name,
                         email,
                         createdAt: new Date().toISOString()
+                    },
+                    {
+                        permissions: [
+                            Appwrite.Permission.read(Appwrite.Role.users()),
+                            Appwrite.write(Appwrite.Role.user(user.$id)))
+                        ]
                     }
                 );
 
@@ -688,9 +739,14 @@
                 currentUser = await account.get();
                 updateAuthUI();
                 registerModal.classList.add('hidden');
+                registerForm.reset();
                 showToast('Registration successful!');
             } catch (error) {
-                showToast(`Registration failed: ${error.message}`, 'error');
+                let errorMessage = error.message;
+                if (error.code === 409) {
+                    errorMessage = 'Email already exists';
+                }
+                showToast(`Registration failed: ${errorMessage}`, 'error');
             }
         });
 
@@ -708,78 +764,94 @@
         });
 
         // PDF upload handling
-        pdfUpload.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                if (file.type !== 'application/pdf') {
-                    showToast('Please upload a PDF file', 'error');
-                    return;
-                }
-
-                if (file.size > 10 * 1024 * 1024) { // 10MB limit
-                    showToast('File size exceeds 10MB limit', 'error');
-                    return;
-                }
-
-                fileName.textContent = file.name;
-                pdfPreview.classList.add('has-file');
-
-                // Simulate upload progress
-                let progress = 0;
-                const progressInterval = setInterval(() => {
-                    progress += 10;
-                    document.querySelector('.progress-bar').style.width = `${progress}%`;
-                    if (progress >= 100) {
-                        clearInterval(progressInterval);
-                    }
-                }, 100);
+        pdfUpload.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) {
+                showToast('No file selected', 'error');
+                return;
             }
+
+            if (file.type !== 'application/pdf') {
+                showToast('Please upload a PDF file', 'error');
+                pdfUpload.value = '';
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                showToast('File size exceeds 10MB limit', 'error');
+                pdfUpload.value = '';
+                return;
+            }
+
+            fileName.textContent = file.name;
+            pdfPreview.classList.add('has-file');
+
+            // Visual feedback
+            let progress = 0;
+            const progressBar = document.querySelector('.progress-bar');
+            progressBar.style.width = '0%';
+            const progressInterval = setInterval(() => {
+                progress += 10;
+                progressBar.style.width = `${progress}%`;
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                }
+            }, 100);
+
         });
 
-        // Drag and drop for PDF upload
+        // Drag-and-drop handling
         pdfPreview.addEventListener('dragover', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             pdfPreview.classList.add('bg-blue-50');
         });
 
-        pdfPreview.addEventListener('dragleave', () => {
+        pdfPreview.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             pdfPreview.classList.remove('bg-blue-50');
         });
 
         pdfPreview.addEventListener('drop', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             pdfPreview.classList.remove('bg-blue-50');
 
             const file = e.dataTransfer.files[0];
-            if (file) {
-                if (file.type !== 'application/pdf') {
-                    showToast('Please upload a PDF file', 'error');
-                    return;
-                }
-
-                if (file.size > 10 * 1024 * 1024) { // 10MB limit
-                    showToast('File size exceeds 10MB limit', 'error');
-                    return;
-                }
-
-                // Set the file to the input
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(file);
-                pdfUpload.files = dataTransfer.files;
-
-                fileName.textContent = file.name;
-                pdfPreview.classList.add('has-file');
-
-                // Simulate upload progress
-                let progress = 0;
-                const progressInterval = setInterval(() => {
-                    progress += 10;
-                    document.querySelector('.progress-bar').style.width = `${progress}%`;
-                    if (progress >= 100) {
-                        clearInterval(progressInterval);
-                    }
-                }, 100);
+            if (!file) {
+                showToast('No file dropped', 'error');
+                return;
             }
+
+            if (file.type !== 'application/pdf') {
+                showToast('Please drop a PDF file', 'error');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                showToast('File size exceeds 10MB limit', 'error');
+                return;
+            }
+
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.append(file);
+            pdfUpload.files = dataTransfer.files;
+
+            fileName.textContent = file.name;
+            pdfPreview.classList.append('has-file');
+
+            // Visual feedback
+            let progress = 0;
+            const progressBar = pdfPreview.querySelector('.progress-bar');
+            progressBar.style.width = '0%';
+            const progressInterval = setInterval(() => {
+                progress += 10;
+                progressBar.style.width = `${progress}%`;
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                }
+            }, 100);
         });
 
         // Upload form submission
@@ -788,14 +860,25 @@
 
             if (!currentUser) {
                 showToast('Please login to upload notes', 'error');
+                loginModal.classList.add('flex', 'items-center', 'justify-center');
                 loginModal.classList.remove('hidden');
                 return;
             }
 
-            const title = document.getElementById('noteTitle').value;
+            const title = document.getElementById('noteTitle').value.trim();
             const subject = document.getElementById('noteSubject').value;
-            const description = document.getElementById('noteDescription').value;
+            const description = document.getElementById('noteDescription').value.trim();
             const file = pdfUpload.files[0];
+
+            if (!title) {
+                showToast('Please enter a note title', 'error');
+                return;
+            }
+
+            if (!subject) {
+                showToast('Please select a subject', 'error');
+                return;
+            }
 
             if (!file) {
                 showToast('Please select a PDF file', 'error');
@@ -803,15 +886,29 @@
             }
 
             try {
-                // Upload file to Appwrite Storage
+                // Disable form during upload
+                const submitButton = uploadForm.querySelector('button[type="submit"]');
+                submitButton.disabled = true;
+                submitButton.textContent = 'Uploading...';
+
+                // Reset progress
+                const progressBar = pdfPreview.querySelector('.progress-bar');
+                progressBar.style.width = '0%';
+
+                // Upload file to storage
                 const fileResponse = await storage.createFile(
                     BUCKET_ID,
                     Appwrite.ID.unique(),
-                    file
+                    file,
+                    undefined,
+                    (progress) => {
+                        const percentage = Math.round((progress.progress / progress.total) * 100);
+                        progressBar.style.width = `${percentage}%`;
+                    }
                 );
 
-                // Create note document in database
-                const note = await databases.createDocument(
+                // Create note document
+                await databases.createDocument(
                     DATABASE_ID,
                     NOTES_COLLECTION_ID,
                     Appwrite.ID.unique(),
@@ -820,44 +917,82 @@
                         subject,
                         description,
                         fileId: fileResponse.$id,
-                        filename: file.name,
-                        filesize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+                        filename: fileResponse.name,
+                        filesize: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
                         uploadDate: new Date().toISOString().split('T')[0],
                         downloads: 0,
                         author: currentUser.name,
                         authorId: currentUser.$id,
                         rating: 0
-                    }
+                    },
+                    {
+                        permissions: [
+                            Appwrite.Permission.read(Appwrite.Role.users()),
+                            Appwrite.Permission.write(Appwrite.Role.user(currentUser.$id)))
+                    ]
                 );
 
                 // Reset form
                 uploadForm.reset();
                 pdfPreview.classList.remove('has-file');
                 fileName.textContent = '';
-                document.querySelector('.progress-bar').style.width = '0%';
+                progressBar.style.width = '0%';
+
+                // Re-enable form
+                submitButton.disabled = false;
+                submitButton.textContent = 'Upload Notes';
 
                 // Update UI
                 await renderNotes();
                 await updateStats();
                 showToast('Notes uploaded successfully!');
-
+                
                 // Scroll to browse section
                 document.querySelector('#browse').scrollIntoView({ behavior: 'smooth' });
             } catch (error) {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Upload Notes';
                 showToast(`Upload failed: ${error.message}`, 'error');
             }
         });
 
-        // Render notes in the grid
-        async function renderNotes() {
+        // Render notes with search, filter, and pagination
+        async function renderNotes(page = 1) {
             try {
-                const response = await databases.listDocuments(DATABASE_ID, NOTES_COLLECTION_ID);
-                const notes = response.documents;
-                notesGrid.innerHTML = '';
+                const searchTerm = searchInput.value.trim();
+                const subject = subjectFilter.value;
+                const sortBy = sortFilter.value;
 
-                notes.forEach(note => {
+                const queries = [
+                    Query.limit(NOTES_PER_PAGE),
+                    Query.offset((page - 1) * NOTES_PER_PAGE)
+                ];
+
+                if (searchTerm) {
+                    queries.push(Query.search('title', searchTerm));
+                }
+                if (subject) {
+                    queries.push(Query.equal('subject', subject));
+                }
+                if (sortBy === 'recent') {
+                    queries.push(Query.orderDesc('uploadDate'));
+                } else if (sortBy === 'downloads') {
+                    queries.push(Query.orderDesc('downloads'));
+                } else if (sortBy === 'rating') {
+                    queries.push(Query.order('rating'));
+                }
+
+                const response = await databases.listDocuments(
+                    DATABASE_ID,
+                    NOTES_COLLECTION_ID,
+                    queries
+                );
+                notesGrid.innerHTML = array '';
+
+                response.documents.forEach(note => {
                     const noteCard = document.createElement('div');
-                    noteCard.className = 'bg-white rounded-lg shadow-md overflow-hidden note-card transition duration-300';
+                    noteCard.classList.add('bg-white', 'rounded-lg', 'shadow-md', 'overflow-hidden', 'note-card', 'transition', 'duration-300');
+                    noteCard.innerHTML = noteCard;
                     noteCard.innerHTML = `
                         <div class="p-6">
                             <div class="flex items-center mb-4">
@@ -866,19 +1001,22 @@
                                     <h3 class="font-bold text-lg truncate">${note.title}</h3>
                                     <p class="text-gray-500">${note.subject}</p>
                                 </div>
-                            </div>
+                                </div>
                             <p class="text-gray-700 mb-4 line-clamp-2">${note.description}</p>
                             <div class="flex justify-between items-center">
                                 <div>
                                     <p class="text-sm text-gray-500">${note.uploadDate}</p>
                                     <p class="text-sm text-gray-500">${note.downloads} downloads</p>
                                 </div>
-                                <button class="view-note-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium" data-id="${note.$id}">View</button>
+                                <button class="view-note-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium"> data-id="${note.$id}">View</button>
                             </div>
                         </div>
                     `;
                     notesGrid.appendChild(noteCard);
                 });
+
+                // Update pagination
+                updatePagination(page, Math.ceil(response.total / NOTES_PER_PAGE));
 
                 // Add event listeners to view buttons
                 document.querySelectorAll('.view-note-btn').forEach(btn => {
@@ -892,6 +1030,73 @@
             }
         }
 
+        // Update pagination UI
+        function updatePagination(currentPage, totalPages) {
+            pagination.innerHTML = '';
+            const prevBtn = document.createElement('a');
+            prevBtn.href = '#';
+            prevBtn.className = 'px-3 py-2 rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50';
+            prevBtn.textContent = 'Previous';
+            if (currentPage === 1) {
+                prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                prevBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (currentPage > 1) {
+                        currentPage--;
+                        renderNotes(currentPage);
+                    }
+                });
+            }
+            pagination.appendChild(prevBtn);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageBtn = document.createElement('a');
+                pageBtn.href = '#';
+                pageBtn.className = `px-3 py-2 border border-gray-300 ${i === currentPage ? 'bg-blue-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}`;
+                pageBtn.textContent = i;
+                pageBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    currentPage = i;
+                    renderNotes(currentPage);
+                });
+                pagination.appendChild(pageBtn);
+            }
+
+            const nextBtn = document.createElement('a');
+            nextBtn.href = '#';
+            nextBtn.className = 'px-3 py-2 rounded-r-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50';
+            nextBtn.textContent = 'Next';
+            if (currentPage === totalPages) {
+                nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                nextBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        renderNotes(currentPage);
+                    }
+                });
+            }
+            pagination.appendChild(nextBtn);
+        }
+
+        // Search and filter listeners
+        searchInput.addEventListener('input', () => {
+            currentPage = 1;
+            renderNotes();
+        });
+
+        subjectFilter.addEventListener('change', () => {
+            currentPage = 1;
+            renderNotes();
+        });
+
+        sortFilter.addEventListener('change', () => {
+            currentPage = 1;
+            renderNotes();
+        });
+
         // View note details
         async function viewNote(id) {
             try {
@@ -900,16 +1105,16 @@
                 document.getElementById('previewNoteTitle').textContent = note.title;
                 document.getElementById('previewNoteAuthor').textContent = `By ${note.author}`;
                 document.getElementById('previewNoteDate').textContent = `Uploaded on ${note.uploadDate}`;
-                document.getElementById('previewNoteDescription').textContent = note.description;
+                document.getElementById('previewNoteDescription').textContent = note.description || 'No description provided';
                 document.getElementById('previewNoteFilename').textContent = note.filename;
                 document.getElementById('previewNoteFilesize').textContent = note.filesize;
                 document.getElementById('previewNoteSubject').textContent = note.subject;
                 document.getElementById('previewNoteDownloads').textContent = note.downloads;
                 document.getElementById('previewNoteUploadDate').textContent = note.uploadDate;
 
-                // Set download button data attribute
                 downloadNoteBtn.setAttribute('data-id', note.$id);
 
+                notePreviewModal.classList.add('flex', 'items-center', 'justify-center');
                 notePreviewModal.classList.remove('hidden');
             } catch (error) {
                 showToast(`Failed to load note: ${error.message}`, 'error');
@@ -921,18 +1126,14 @@
             const noteId = downloadNoteBtn.getAttribute('data-id');
 
             try {
-                // Get note document
                 const note = await databases.getDocument(DATABASE_ID, NOTES_COLLECTION_ID, noteId);
 
-                // Increment download count
                 await databases.updateDocument(DATABASE_ID, NOTES_COLLECTION_ID, noteId, {
                     downloads: note.downloads + 1
                 });
 
-                // Get file download URL
                 const filePreview = storage.getFileDownload(BUCKET_ID, note.fileId);
 
-                // Create a temporary link to trigger download
                 const link = document.createElement('a');
                 link.href = filePreview;
                 link.download = note.filename;
@@ -940,12 +1141,10 @@
                 link.click();
                 document.body.removeChild(link);
 
-                // Update UI
-                await renderNotes();
+                await renderNotes(currentPage);
                 await updateStats();
                 showToast('Download started!');
 
-                // Close modal after a delay
                 setTimeout(() => {
                     notePreviewModal.classList.add('hidden');
                 }, 1000);
@@ -966,10 +1165,8 @@
                 const usersResponse = await databases.listDocuments(DATABASE_ID, USERS_COLLECTION_ID);
                 const notes = notesResponse.documents;
 
-                // Calculate total downloads
                 const totalDownloads = notes.reduce((sum, note) => sum + note.downloads, 0);
 
-                // Update DOM
                 document.getElementById('totalNotes').textContent = notes.length.toLocaleString();
                 document.getElementById('totalUsers').textContent = usersResponse.total.toLocaleString();
                 document.getElementById('totalDownloads').textContent = totalDownloads.toLocaleString();
