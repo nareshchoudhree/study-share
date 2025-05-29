@@ -6,18 +6,46 @@
     <title>StudyShare - Student Notes Exchange</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/appwrite@15.0.0/dist/index.umd.js"></script>
     <style>
-        .pdf-icon { color: #e74c3c; }
-        .dropdown:hover .dropdown-menu { display: block; }
-        .file-upload { position: relative; overflow: hidden; display: inline-block; }
-        .file-upload input[type="file"] { position: absolute; left: 0; top: 0; opacity: 0; }
-        .pdf-preview { border: 2px dashed #ddd; min-height: 200px; display: flex; align-items: center; justify-content: center; flex-direction: column; }
-        .pdf-preview.has-file { border-color: #4CAF50; }
-        .note-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .progress-bar { height: 5px; background-color: #4CAF50; width: 0%; transition: width 0.3s; }
-        .profile-upload { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; }
-        .user-profile-pic { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
-        .author-profile-pic { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .pdf-icon {
+            color: #e74c3c;
+        }
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+        .file-upload {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        .file-upload input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+        }
+        .pdf-preview {
+            border: 2px dashed #ddd;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .pdf-preview.has-file {
+            border-color: #4CAF50;
+        }
+        .note-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .progress-bar {
+            height: 5px;
+            background-color: #4CAF50;
+            width: 0%;
+            transition: width 0.3s;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -44,13 +72,13 @@
                     <a href="#" id="registerBtn" class="py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-300">Register</a>
                     <div class="dropdown relative hidden" id="userDropdown">
                         <button class="flex items-center space-x-2 focus:outline-none">
-                            <img id="userProfilePic" src="https://via.placeholder.com/30" alt="User" class="user-profile-pic">
+                            <img src="https://via.placeholder.com/30" alt="User" class="rounded-full">
                             <span id="usernameDisplay" class="font-medium"></span>
                             <i class="fas fa-chevron-down text-xs"></i>
                         </button>
                         <div class="dropdown-menu absolute hidden right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Notes</a>
-                            <a href="#" id="accountSettingsBtn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Account Settings</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Account Settings</a>
                             <a href="#" id="logoutBtn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
                         </div>
                     </div>
@@ -64,7 +92,7 @@
         </div>
         <div class="hidden mobile-menu">
             <ul>
-                <li><a href="#home" class="block text-sm px-2 py-4 hover:bg-blue-600 hover:text-white transition duration-300">Home</a></li>
+                <li><a href="#homeOSD" class="block text-sm px-2 py-4 hover:bg-blue-600 hover:text-white transition duration-300">Home</a></li>
                 <li><a href="#browse" class="block text-sm px-2 py-4 hover:bg-blue-600 hover:text-white transition duration-300">Browse Notes</a></li>
                 <li><a href="#upload" class="block text-sm px-2 py-4 hover:bg-blue-600 hover:text-white transition duration-300">Upload Notes</a></li>
                 <li><a href="#about" class="block text-sm px-2 py-4 hover:bg-blue-600 hover:text-white transition duration-300">About</a></li>
@@ -98,15 +126,15 @@
         <div class="container mx-auto px-4">
             <div class="flex flex-wrap justify-center text-center">
                 <div class="w-full md:w-1/3 px-4 py-6">
-                    <div class="text-5xl font-bold text-blue-600 mb-2" id="totalNotes">1,245</div>
+                    <div class="text-5xl font-bold text-blue-600 mb-2" id="totalNotes">0</div>
                     <div class="text-gray-600">Notes Shared</div>
                 </div>
                 <div class="w-full md:w-1/3 px-4 py-6">
-                    <div class="text-5xl font-bold text-blue-600 mb-2" id="totalUsers">3,892</div>
+                    <div class="text-5xl font-bold text-blue-600 mb-2" id="totalUsers">0</div>
                     <div class="text-gray-600">Active Students</div>
                 </div>
                 <div class="w-full md:w-1/3 px-4 py-6">
-                    <div class="text-5xl font-bold text-blue-600 mb-2" id="totalDownloads">8,756</div>
+                    <div class="text-5xl font-bold text-blue-600 mb-2" id="totalDownloads">0</div>
                     <div class="text-gray-600">Downloads</div>
                 </div>
             </div>
@@ -122,21 +150,22 @@
             <div class="mb-8 bg-white p-6 rounded-lg shadow-md">
                 <div class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
                     <div class="flex-1">
-                        <input type="text" id="searchInput" placeholder="Search notes by subject, course, or keyword..." class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" placeholder="Search notes by subject, course, or keyword..." class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div class="flex space-x-2">
-                        <select id="subjectFilter" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Subjects</option>
+                        <select class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>All Subjects</option>
                             <option>Mathematics</option>
                             <option>Science</option>
                             <option>Engineering</option>
                             <option>Business</option>
                             <option>Arts</option>
                         </select>
-                        <select id="sortFilter" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="recent">Most Recent</option>
-                            <option value="downloads">Most Downloaded</option>
-                            <option value="rating">Highest Rated</option>
+                        <select class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>Sort By</option>
+                            <option>Most Recent</option>
+                            <option>Most Downloaded</option>
+                            <option>Highest Rated</option>
                         </select>
                     </div>
                 </div>
@@ -149,7 +178,7 @@
             
             <!-- Pagination -->
             <div class="mt-12 flex justify-center">
-                <nav class="inline-flex rounded-md shadow" id="pagination">
+                <nav class="inline-flex rounded-md shadow">
                     <a href="#" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">Previous</a>
                     <a href="#" class="px-3 py-2 border-t border-b border-gray-300 bg-blue-600 text-white">1</a>
                     <a href="#" class="px-3 py-2 border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">2</a>
@@ -224,54 +253,6 @@
             </div>
         </div>
     </section>
-
-    <!-- Account Settings Modal -->
-    <div id="accountSettingsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg w-full max-w-md">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-2xl font-bold">Account Settings</h3>
-                    <button id="closeAccountSettingsModal" class="text-gray-500 hover:text-gray-700">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <form id="accountSettingsForm">
-                    <div class="mb-6 text-center">
-                        <img id="currentProfilePic" src="https://via.placeholder.com/120" alt="Profile" class="profile-upload mx-auto mb-4">
-                        <div class="file-upload">
-                            <input type="file" id="profilePicUpload" accept="image/*" class="hidden">
-                            <label for="profilePicUpload" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg cursor-pointer">Change Profile Picture</label>
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700 mb-2" for="accountName">Full Name</label>
-                        <input type="text" id="accountName" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700 mb-2" for="accountEmail">Email</label>
-                        <input type="email" id="accountEmail" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700 mb-2" for="accountPassword">New Password (optional)</label>
-                        <input type="password" id="accountPassword" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700 mb-2">Data Management</label>
-                        <div class="flex space-x-2">
-                            <button type="button" id="exportNotesBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Export Notes</button>
-                            <div class="file-upload">
-                                <input type="file" id="importNotesInput" accept=".json" class="hidden">
-                                <label for="importNotesInput" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg cursor-pointer">Import Notes</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex justify-end">
-                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">Save Changes</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 
     <!-- About Section -->
     <section id="about" class="py-16 bg-gray-50">
@@ -456,7 +437,7 @@
                     </button>
                 </div>
                 <div class="flex items-center mb-6">
-                    <img id="previewNoteAuthorPic" src="https://via.placeholder.com/40" alt="Author" class="author-profile-pic mr-3">
+                    <img src="https://via.placeholder.com/40" alt="Author" class="rounded-full mr-3">
                     <div>
                         <p id="previewNoteAuthor" class="font-medium"></p>
                         <p id="previewNoteDate" class="text-sm text-gray-500"></p>
@@ -516,183 +497,24 @@
     </div>
 
     <script>
-        // IndexedDB setup
-        let db;
-        const dbRequest = indexedDB.open('StudyShareDB', 1);
+        // Initialize Appwrite client
+        const client = new Appwrite.Client();
+        client
+            .setEndpoint('https://fra.cloud.appwrite.io/v1') // e.g., 'https://cloud.appwrite.io/v1'
+            .setProject('68382a3100107360bf24'); // Replace with your Appwrite project ID
 
-        dbRequest.onupgradeneeded = function(event) {
-            db = event.target.result;
-            if (!db.objectStoreNames.contains('users')) {
-                db.createObjectStore('users', { keyPath: 'id' });
-            }
-            if (!db.objectStoreNames.contains('notes')) {
-                db.createObjectStore('notes', { keyPath: 'id' });
-            }
-        };
+        const account = new Appwrite.Account(client);
+        const databases = new Appwrite.Databases(client);
+        const storage = new Appwrite.Storage(client);
 
-        dbRequest.onsuccess = function(event) {
-            db = event.target.result;
-            initializeApp();
-        };
-
-        dbRequest.onerror = function(event) {
-            console.error('IndexedDB error:', event.target.errorCode);
-            showToast('Database initialization failed', 'error');
-        };
-
-        // Initialize sample data
-        async function initializeSampleData() {
-            const sampleNotes = [
-                {
-                    id: 1,
-                    title: "Calculus I Lecture Notes",
-                    subject: "Mathematics",
-                    description: "Complete lecture notes for Calculus I covering limits, derivatives, and integrals.",
-                    filename: "calculus_notes.pdf",
-                    filesize: "2.4 MB",
-                    uploadDate: "2023-05-15",
-                    downloads: 124,
-                    author: "John Doe",
-                    authorId: 1,
-                    rating: 4.5,
-                    fileData: null
-                },
-                {
-                    id: 2,
-                    title: "Introduction to Computer Science",
-                    subject: "Computer Science",
-                    description: "Comprehensive notes on algorithms, data structures, and basic programming concepts.",
-                    filename: "cs_intro.pdf",
-                    filesize: "3.1 MB",
-                    uploadDate: "2023-06-02",
-                    downloads: 89,
-                    author: "Jane Smith",
-                    authorId: 2,
-                    rating: 4.2,
-                    fileData: null
-                },
-                {
-                    id: 3,
-                    title: "Organic Chemistry Study Guide",
-                    subject: "Chemistry",
-                    description: "Detailed study guide with reaction mechanisms and important concepts for Organic Chemistry.",
-                    filename: "organic_chem.pdf",
-                    filesize: "4.7 MB",
-                    uploadDate: "2023-04-28",
-                    downloads: 156,
-                    author: "Robert Johnson",
-                    authorId: 3,
-                    rating: 4.7,
-                    fileData: null
-                },
-                {
-                    id: 4,
-                    title: "Microeconomics Principles",
-                    subject: "Economics",
-                    description: "Notes covering supply and demand, market structures, and consumer behavior.",
-                    filename: "microeconomics.pdf",
-                    filesize: "1.8 MB",
-                    uploadDate: "2023-07-10",
-                    downloads: 67,
-                    author: "Emily Davis",
-                    authorId: 4,
-                    rating: 4.0,
-                    fileData: null
-                },
-                {
-                    id: 5,
-                    title: "Modern World History",
-                    subject: "History",
-                    description: "Comprehensive notes on major events from 1900 to present day.",
-                    filename: "world_history.pdf",
-                    filesize: "5.2 MB",
-                    uploadDate: "2023-03-22",
-                    downloads: 112,
-                    author: "Michael Brown",
-                    authorId: 5,
-                    rating: 4.3,
-                    fileData: null
-                },
-                {
-                    id: 6,
-                    title: "Physics 101: Mechanics",
-                    subject: "Physics",
-                    description: "Detailed notes on Newtonian mechanics, kinematics, and dynamics.",
-                    filename: "physics_mechanics.pdf",
-                    filesize: "2.9 MB",
-                    uploadDate: "2023-06-18",
-                    downloads: 94,
-                    author: "Sarah Wilson",
-                    authorId: 6,
-                    rating: 4.4,
-                    fileData: null
-                }
-            ];
-
-            const notes = await getAllNotes();
-            if (notes.length === 0) {
-                const tx = db.transaction('notes', 'readwrite');
-                const store = tx.objectStore('notes');
-                sampleNotes.forEach(note => store.put(note));
-                await tx.complete;
-            }
-        }
-
-        // IndexedDB helper functions
-        function getAllUsers() {
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction('users', 'readonly');
-                const store = tx.objectStore('users');
-                const request = store.getAll();
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        function getAllNotes() {
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction('notes', 'readonly');
-                const store = tx.objectStore('notes');
-                const request = store.getAll();
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        function getUser(id) {
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction('users', 'readonly');
-                const store = tx.objectStore('users');
-                const request = store.get(id);
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        function putUser(user) {
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction('users', 'readwrite');
-                const store = tx.objectStore('users');
-                const request = store.put(user);
-                request.onsuccess = () => resolve();
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        function putNote(note) {
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction('notes', 'readwrite');
-                const store = tx.objectStore('notes');
-                const request = store.put(note);
-                request.onsuccess = () => resolve();
-                request.onerror = () => reject(request.error);
-            });
-        }
+        // Appwrite configuration
+        const DATABASE_ID = '68382af700129c7bca60'; // Replace with your Appwrite database ID
+        const NOTES_COLLECTION_ID = '68382c2a002426c4f2d8'; // Replace with your notes collection ID
+        const USERS_COLLECTION_ID = 'Y68382b3b00359aecee59'; // Replace with your users collection ID
+        const BUCKET_ID = '6838311100000962dbc9'; // Replace with your storage bucket ID
 
         // Current user state
         let currentUser = null;
-        let currentPage = 1;
-        const notesPerPage = 6;
 
         // DOM Elements
         const loginBtn = document.getElementById('loginBtn');
@@ -702,22 +524,16 @@
         const logoutBtn = document.getElementById('logoutBtn');
         const userDropdown = document.getElementById('userDropdown');
         const usernameDisplay = document.getElementById('usernameDisplay');
-        const userProfilePic = document.getElementById('userProfilePic');
         const loginModal = document.getElementById('loginModal');
         const registerModal = document.getElementById('registerModal');
-        const accountSettingsModal = document.getElementById('accountSettingsModal');
         const closeLoginModal = document.getElementById('closeLoginModal');
         const closeRegisterModal = document.getElementById('closeRegisterModal');
-        const closeAccountSettingsModal = document.getElementById('closeAccountSettingsModal');
         const showRegisterFromLogin = document.getElementById('showRegisterFromLogin');
         const showLoginFromRegister = document.getElementById('showLoginFromRegister');
-        const accountSettingsBtn = document.getElementById('accountSettingsBtn');
         const loginForm = document.getElementById('loginForm');
         const registerForm = document.getElementById('registerForm');
-        const accountSettingsForm = document.getElementById('accountSettingsForm');
         const uploadForm = document.getElementById('uploadForm');
         const pdfUpload = document.getElementById('pdfUpload');
-        const profilePicUpload = document.getElementById('profilePicUpload');
         const pdfPreview = document.querySelector('.pdf-preview');
         const fileName = document.getElementById('fileName');
         const notesGrid = document.getElementById('notesGrid');
@@ -726,14 +542,6 @@
         const downloadNoteBtn = document.getElementById('downloadNoteBtn');
         const successToast = document.getElementById('successToast');
         const toastMessage = document.getElementById('toastMessage');
-        const searchInput = document.getElementById('searchInput');
-        const subjectFilter = document.getElementById('subjectFilter');
-        const sortFilter = document.getElementById('sortFilter');
-        const pagination = document.getElementById('pagination');
-        const currentProfilePic = document.getElementById('currentProfilePic');
-        const previewNoteAuthorPic = document.getElementById('previewNoteAuthorPic');
-        const exportNotesBtn = document.getElementById('exportNotesBtn');
-        const importNotesInput = document.getElementById('importNotesInput');
 
         // Mobile menu toggle
         const mobileMenuButton = document.querySelector('.mobile-menu-button');
@@ -743,18 +551,17 @@
             mobileMenu.classList.toggle('hidden');
         });
 
-        // Initialize app
-        async function initializeApp() {
-            await initializeSampleData();
-            const loggedInUser = await getUser('currentUser');
-            if (loggedInUser) {
-                currentUser = loggedInUser;
+        // Check if user is logged in on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                currentUser = await account.get();
                 updateAuthUI();
+            } catch (error) {
+                console.log('No user logged in:', error);
             }
-            renderNotes();
-            updateStats();
-            setupSearchAndFilter();
-        }
+            await renderNotes();
+            await updateStats();
+        });
 
         // Update authentication UI
         function updateAuthUI() {
@@ -765,7 +572,6 @@
                 mobileRegisterBtn.classList.add('hidden');
                 userDropdown.classList.remove('hidden');
                 usernameDisplay.textContent = currentUser.name.split(' ')[0];
-                userProfilePic.src = currentUser.profilePic || 'https://via.placeholder.com/30';
             } else {
                 loginBtn.classList.remove('hidden');
                 registerBtn.classList.remove('hidden');
@@ -798,24 +604,12 @@
             mobileMenu.classList.add('hidden');
         });
 
-        accountSettingsBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            accountSettingsModal.classList.remove('hidden');
-            document.getElementById('accountName').value = currentUser.name;
-            document.getElementById('accountEmail').value = currentUser.email;
-            currentProfilePic.src = currentUser.profilePic || 'https://via.placeholder.com/120';
-        });
-
         closeLoginModal.addEventListener('click', () => {
             loginModal.classList.add('hidden');
         });
 
         closeRegisterModal.addEventListener('click', () => {
             registerModal.classList.add('hidden');
-        });
-
-        closeAccountSettingsModal.addEventListener('click', () => {
-            accountSettingsModal.classList.add('hidden');
         });
 
         showRegisterFromLogin.addEventListener('click', (e) => {
@@ -832,10 +626,15 @@
 
         // Close modals when clicking outside
         window.addEventListener('click', (e) => {
-            if (e.target === loginModal) loginModal.classList.add('hidden');
-            if (e.target === registerModal) registerModal.classList.add('hidden');
-            if (e.target === notePreviewModal) notePreviewModal.classList.add('hidden');
-            if (e.target === accountSettingsModal) accountSettingsModal.classList.add('hidden');
+            if (e.target === loginModal) {
+                loginModal.classList.add('hidden');
+            }
+            if (e.target === registerModal) {
+                registerModal.classList.add('hidden');
+            }
+            if (e.target === notePreviewModal) {
+                notePreviewModal.classList.add('hidden');
+            }
         });
 
         // Login form submission
@@ -844,17 +643,14 @@
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
 
-            const users = await getAllUsers();
-            const user = users.find(u => u.email === email && u.password === password);
-
-            if (user) {
-                currentUser = user;
-                await putUser({ id: 'currentUser', ...user });
+            try {
+                await account.createEmailPasswordSession(email, password);
+                currentUser = await account.get();
                 updateAuthUI();
                 loginModal.classList.add('hidden');
                 showToast('Login successful!');
-            } else {
-                showToast('Invalid email or password', 'error');
+            } catch (error) {
+                showToast(`Login failed: ${error.message}`, 'error');
             }
         });
 
@@ -871,87 +667,43 @@
                 return;
             }
 
-            const users = await getAllUsers();
-
-            if (users.some(u => u.email === email)) {
-                showToast('Email already registered', 'error');
-                return;
-            }
-
-            const newUser = {
-                id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
-                name,
-                email,
-                password,
-                profilePic: 'https://via.placeholder.com/30'
-            };
-
-            await putUser(newUser);
-            currentUser = newUser;
-            await putUser({ id: 'currentUser', ...newUser });
-            updateAuthUI();
-            registerModal.classList.add('hidden');
-            showToast('Registration successful!');
-        });
-
-        // Account settings form submission
-        accountSettingsForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('accountName').value;
-            const email = document.getElementById('accountEmail').value;
-            const password = document.getElementById('accountPassword').value;
-
-            const users = await getAllUsers();
-            const userIndex = users.findIndex(u => u.id === currentUser.id);
-
-            if (userIndex !== -1) {
-                if (users.some(u => u.email === email && u.id !== currentUser.id)) {
-                    showToast('Email already in use', 'error');
-                    return;
-                }
-
-                users[userIndex].name = name;
-                users[userIndex].email = email;
-                if (password) users[userIndex].password = password;
-
-                await putUser(users[userIndex]);
-                currentUser = users[userIndex];
-                await putUser({ id: 'currentUser', ...currentUser });
-                updateAuthUI();
-                accountSettingsModal.classList.add('hidden');
-                showToast('Profile updated successfully!');
-            }
-        });
-
-        // Profile picture upload
-        profilePicUpload.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                if (!file.type.startsWith('image/')) {
-                    showToast('Please upload an image file', 'error');
-                    return;
-                }
-
-                if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                    showToast('Image size exceeds 5MB limit', 'error');
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    const users = await getAllUsers();
-                    const userIndex = users.findIndex(u => u.id === currentUser.id);
-                    if (userIndex !== -1) {
-                        users[userIndex].profilePic = e.target.result;
-                        await putUser(users[userIndex]);
-                        currentUser.profilePic = e.target.result;
-                        await putUser({ id: 'currentUser', ...currentUser });
-                        currentProfilePic.src = e.target.result;
-                        userProfilePic.src = e.target.result;
-                        showToast('Profile picture updated!');
+            try {
+                // Create user
+                const user = await account.create(Appwrite.ID.unique(), email, password, name);
+                
+                // Store additional user info in database
+                await databases.createDocument(
+                    DATABASE_ID,
+                    USERS_COLLECTION_ID,
+                    user.$id,
+                    {
+                        name,
+                        email,
+                        createdAt: new Date().toISOString()
                     }
-                };
-                reader.readAsDataURL(file);
+                );
+
+                // Log in the new user
+                await account.createEmailPasswordSession(email, password);
+                currentUser = await account.get();
+                updateAuthUI();
+                registerModal.classList.add('hidden');
+                showToast('Registration successful!');
+            } catch (error) {
+                showToast(`Registration failed: ${error.message}`, 'error');
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                await account.deleteSession('current');
+                currentUser = null;
+                updateAuthUI();
+                showToast('Logged out successfully');
+            } catch (error) {
+                showToast(`Logout failed: ${error.message}`, 'error');
             }
         });
 
@@ -964,7 +716,7 @@
                     return;
                 }
 
-                if (file.size > 10 * 1024 * 1024) {
+                if (file.size > 10 * 1024 * 1024) { // 10MB limit
                     showToast('File size exceeds 10MB limit', 'error');
                     return;
                 }
@@ -972,11 +724,14 @@
                 fileName.textContent = file.name;
                 pdfPreview.classList.add('has-file');
 
+                // Simulate upload progress
                 let progress = 0;
                 const progressInterval = setInterval(() => {
                     progress += 10;
                     document.querySelector('.progress-bar').style.width = `${progress}%`;
-                    if (progress >= 100) clearInterval(progressInterval);
+                    if (progress >= 100) {
+                        clearInterval(progressInterval);
+                    }
                 }, 100);
             }
         });
@@ -1002,11 +757,12 @@
                     return;
                 }
 
-                if (file.size > 10 * 1024 * 1024) {
+                if (file.size > 10 * 1024 * 1024) { // 10MB limit
                     showToast('File size exceeds 10MB limit', 'error');
                     return;
                 }
 
+                // Set the file to the input
                 const dataTransfer = new DataTransfer();
                 dataTransfer.items.add(file);
                 pdfUpload.files = dataTransfer.files;
@@ -1014,11 +770,14 @@
                 fileName.textContent = file.name;
                 pdfPreview.classList.add('has-file');
 
+                // Simulate upload progress
                 let progress = 0;
                 const progressInterval = setInterval(() => {
                     progress += 10;
                     document.querySelector('.progress-bar').style.width = `${progress}%`;
-                    if (progress >= 100) clearInterval(progressInterval);
+                    if (progress >= 100) {
+                        clearInterval(progressInterval);
+                    }
                 }, 100);
             }
         });
@@ -1043,220 +802,100 @@
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const notes = await getAllNotes();
-                const newNote = {
-                    id: notes.length > 0 ? Math.max(...notes.map(n => n.id)) + 1 : 1,
-                    title,
-                    subject,
-                    description,
-                    filename: file.name,
-                    filesize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-                    uploadDate: new Date().toISOString().split('T')[0],
-                    downloads: 0,
-                    author: currentUser.name,
-                    authorId: currentUser.id,
-                    rating: 0,
-                    fileData: e.target.result
-                };
+            try {
+                // Upload file to Appwrite Storage
+                const fileResponse = await storage.createFile(
+                    BUCKET_ID,
+                    Appwrite.ID.unique(),
+                    file
+                );
 
-                await putNote(newNote);
+                // Create note document in database
+                const note = await databases.createDocument(
+                    DATABASE_ID,
+                    NOTES_COLLECTION_ID,
+                    Appwrite.ID.unique(),
+                    {
+                        title,
+                        subject,
+                        description,
+                        fileId: fileResponse.$id,
+                        filename: file.name,
+                        filesize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+                        uploadDate: new Date().toISOString().split('T')[0],
+                        downloads: 0,
+                        author: currentUser.name,
+                        authorId: currentUser.$id,
+                        rating: 0
+                    }
+                );
 
+                // Reset form
                 uploadForm.reset();
                 pdfPreview.classList.remove('has-file');
                 fileName.textContent = '';
                 document.querySelector('.progress-bar').style.width = '0%';
 
-                renderNotes();
-                updateStats();
+                // Update UI
+                await renderNotes();
+                await updateStats();
                 showToast('Notes uploaded successfully!');
 
+                // Scroll to browse section
                 document.querySelector('#browse').scrollIntoView({ behavior: 'smooth' });
-            };
-            reader.readAsDataURL(file);
-        });
-
-        // Export notes
-        exportNotesBtn.addEventListener('click', async () => {
-            const notes = await getAllNotes();
-            const exportData = JSON.stringify(notes, null, 2);
-            const blob = new Blob([exportData], { type: 'application/json' });
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'studyshare_notes.json';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-            showToast('Notes exported successfully!');
-        });
-
-        // Import notes
-        importNotesInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                if (file.type !== 'application/json') {
-                    showToast('Please upload a JSON file', 'error');
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    try {
-                        const importedNotes = JSON.parse(e.target.result);
-                        if (!Array.isArray(importedNotes)) {
-                            showToast('Invalid notes format', 'error');
-                            return;
-                        }
-
-                        const tx = db.transaction('notes', 'readwrite');
-                        const store = tx.objectStore('notes');
-                        for (const note of importedNotes) {
-                            // Validate note structure
-                            if (note.id && note.title && note.subject && note.filename) {
-                                await store.put(note);
-                            }
-                        }
-                        await tx.complete;
-
-                        renderNotes();
-                        updateStats();
-                        showToast('Notes imported successfully!');
-                    } catch (err) {
-                        showToast('Error importing notes', 'error');
-                    }
-                };
-                reader.readAsText(file);
+            } catch (error) {
+                showToast(`Upload failed: ${error.message}`, 'error');
             }
         });
 
-        // Search and filter setup
-        function setupSearchAndFilter() {
-            const debouncedRender = debounce(() => {
-                currentPage = 1;
-                renderNotes();
-            }, 300);
-
-            searchInput.addEventListener('input', debouncedRender);
-            subjectFilter.addEventListener('change', debouncedRender);
-            sortFilter.addEventListener('change', debouncedRender);
-        }
-
-        // Debounce function
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
-        // Render notes with pagination
+        // Render notes in the grid
         async function renderNotes() {
-            let notes = await getAllNotes();
+            try {
+                const response = await databases.listDocuments(DATABASE_ID, NOTES_COLLECTION_ID);
+                const notes = response.documents;
+                notesGrid.innerHTML = '';
 
-            // Apply filters
-            const searchTerm = searchInput.value.toLowerCase();
-            const selectedSubject = subjectFilter.value;
-            const sortOption = sortFilter.value;
-
-            // Filter notes
-            notes = notes.filter(note => {
-                const matchesSearch = note.title.toLowerCase().includes(searchTerm) ||
-                    note.subject.toLowerCase().includes(searchTerm) ||
-                    note.description.toLowerCase().includes(searchTerm);
-                const matchesSubject = !selectedSubject || note.subject === selectedSubject;
-                return matchesSearch && matchesSubject;
-            });
-
-            // Sort notes
-            notes.sort((a, b) => {
-                if (sortOption === 'downloads') return b.downloads - a.downloads;
-                if (sortOption === 'rating') return b.rating - a.rating;
-                return new Date(b.uploadDate) - new Date(a.uploadDate);
-            });
-
-            // Pagination
-            const totalPages = Math.ceil(notes.length / notesPerPage);
-            const startIndex = (currentPage - 1) * notesPerPage;
-            const paginatedNotes = notes.slice(startIndex, startIndex + notesPerPage);
-
-            // Render notes
-            notesGrid.innerHTML = '';
-            paginatedNotes.forEach(note => {
-                const noteCard = document.createElement('div');
-                noteCard.className = 'bg-white rounded-lg shadow-md overflow-hidden note-card transition duration-300';
-                noteCard.innerHTML = `
-                    <div class="p-6">
-                        <div class="flex items-center mb-4">
-                            <i class="fas fa-file-pdf pdf-icon text-3xl mr-4"></i>
-                            <div>
-                                <h3 class="font-bold text-lg truncate">${note.title}</h3>
-                                <p class="text-gray-500">${note.subject}</p>
+                notes.forEach(note => {
+                    const noteCard = document.createElement('div');
+                    noteCard.className = 'bg-white rounded-lg shadow-md overflow-hidden note-card transition duration-300';
+                    noteCard.innerHTML = `
+                        <div class="p-6">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-file-pdf pdf-icon text-3xl mr-4"></i>
+                                <div>
+                                    <h3 class="font-bold text-lg truncate">${note.title}</h3>
+                                    <p class="text-gray-500">${note.subject}</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-700 mb-4 line-clamp-2">${note.description}</p>
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-sm text-gray-500">${note.uploadDate}</p>
+                                    <p class="text-sm text-gray-500">${note.downloads} downloads</p>
+                                </div>
+                                <button class="view-note-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium" data-id="${note.$id}">View</button>
                             </div>
                         </div>
-                        <p class="text-gray-700 mb-4 line-clamp-2">${note.description}</p>
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="text-sm text-gray-500">${note.uploadDate}</p>
-                                <p class="text-sm text-gray-500">${note.downloads} downloads</p>
-                            </div>
-                            <button class="view-note-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium" data-id="${note.id}">View</button>
-                        </div>
-                    </div>
-                `;
-                notesGrid.appendChild(noteCard);
-            });
+                    `;
+                    notesGrid.appendChild(noteCard);
+                });
 
-            // Render pagination
-            pagination.innerHTML = '';
-            if (totalPages > 0) {
-                pagination.innerHTML += `<a href="#" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}" data-page="prev">Previous</a>`;
-                for (let i = 1; i <= totalPages; i++) {
-                    pagination.innerHTML += `<a href="#" class="px-3 py-2 border border-gray-300 ${i === currentPage ? 'bg-blue-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}" data-page="${i}">${i}</a>`;
-                }
-                pagination.innerHTML += `<a href="#" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}" data-page="next">Next</a>`;
+                // Add event listeners to view buttons
+                document.querySelectorAll('.view-note-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const noteId = btn.getAttribute('data-id');
+                        viewNote(noteId);
+                    });
+                });
+            } catch (error) {
+                showToast(`Failed to load notes: ${error.message}`, 'error');
             }
-
-            // Add event listeners to pagination buttons
-            document.querySelectorAll('#pagination a').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const page = btn.getAttribute('data-page');
-                    if (page === 'prev' && currentPage > 1) {
-                        currentPage--;
-                    } else if (page === 'next' && currentPage < totalPages) {
-                        currentPage++;
-                    } else if (!isNaN(page)) {
-                        currentPage = parseInt(page);
-                    }
-                    renderNotes();
-                });
-            });
-
-            // Add event listeners to view buttons
-            document.querySelectorAll('.view-note-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const noteId = parseInt(btn.getAttribute('data-id'));
-                    viewNote(noteId);
-                });
-            });
         }
 
         // View note details
         async function viewNote(id) {
-            const notes = await getAllNotes();
-            const note = notes.find(n => n.id === id);
-
-            if (note) {
-                const users = await getAllUsers();
-                const author = users.find(u => u.id === note.authorId);
+            try {
+                const note = await databases.getDocument(DATABASE_ID, NOTES_COLLECTION_ID, id);
 
                 document.getElementById('previewNoteTitle').textContent = note.title;
                 document.getElementById('previewNoteAuthor').textContent = `By ${note.author}`;
@@ -1267,53 +906,51 @@
                 document.getElementById('previewNoteSubject').textContent = note.subject;
                 document.getElementById('previewNoteDownloads').textContent = note.downloads;
                 document.getElementById('previewNoteUploadDate').textContent = note.uploadDate;
-                previewNoteAuthorPic.src = author ? author.profilePic : 'https://via.placeholder.com/40';
 
-                downloadNoteBtn.setAttribute('data-id', note.id);
+                // Set download button data attribute
+                downloadNoteBtn.setAttribute('data-id', note.$id);
+
                 notePreviewModal.classList.remove('hidden');
+            } catch (error) {
+                showToast(`Failed to load note: ${error.message}`, 'error');
             }
         }
 
         // Download note
         downloadNoteBtn.addEventListener('click', async () => {
-            const noteId = parseInt(downloadNoteBtn.getAttribute('data-id'));
-            const notes = await getAllNotes();
-            const noteIndex = notes.findIndex(n => n.id === noteId);
+            const noteId = downloadNoteBtn.getAttribute('data-id');
 
-            if (noteIndex !== -1) {
-                if (!notes[noteIndex].fileData) {
-                    showToast('No file data available for download', 'error');
-                    return;
-                }
+            try {
+                // Get note document
+                const note = await databases.getDocument(DATABASE_ID, NOTES_COLLECTION_ID, noteId);
 
-                notes[noteIndex].downloads += 1;
-                await putNote(notes[noteIndex]);
+                // Increment download count
+                await databases.updateDocument(DATABASE_ID, NOTES_COLLECTION_ID, noteId, {
+                    downloads: note.downloads + 1
+                });
 
-                // Convert base64 to blob and trigger download
-                const byteString = atob(notes[noteIndex].fileData.split(',')[1]);
-                const mimeString = notes[noteIndex].fileData.split(',')[0].split(':')[1].split(';')[0];
-                const ab = new ArrayBuffer(byteString.length);
-                const ia = new Uint8Array(ab);
-                for (let i = 0; i < byteString.length; i++) {
-                    ia[i] = byteString.charCodeAt(i);
-                }
-                const blob = new Blob([ab], { type: mimeString });
+                // Get file download URL
+                const filePreview = storage.getFileDownload(BUCKET_ID, note.fileId);
 
+                // Create a temporary link to trigger download
                 const link = document.createElement('a');
-                link.href = window.URL.createObjectURL(blob);
-                link.download = notes[noteIndex].filename;
+                link.href = filePreview;
+                link.download = note.filename;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                window.URL.revokeObjectURL(link.href);
 
-                renderNotes();
-                updateStats();
+                // Update UI
+                await renderNotes();
+                await updateStats();
                 showToast('Download started!');
 
+                // Close modal after a delay
                 setTimeout(() => {
                     notePreviewModal.classList.add('hidden');
                 }, 1000);
+            } catch (error) {
+                showToast(`Download failed: ${error.message}`, 'error');
             }
         });
 
@@ -1322,28 +959,23 @@
             notePreviewModal.classList.add('hidden');
         });
 
-        // Logout
-        logoutBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            currentUser = null;
-            const tx = db.transaction('users', 'readwrite');
-            const store = tx.objectStore('users');
-            await store.delete('currentUser');
-            await tx.complete;
-            updateAuthUI();
-            showToast('Logged out successfully');
-        });
-
         // Update stats
         async function updateStats() {
-            const notes = await getAllNotes();
-            const users = await getAllUsers();
+            try {
+                const notesResponse = await databases.listDocuments(DATABASE_ID, NOTES_COLLECTION_ID);
+                const usersResponse = await databases.listDocuments(DATABASE_ID, USERS_COLLECTION_ID);
+                const notes = notesResponse.documents;
 
-            const totalDownloads = notes.reduce((sum, note) => sum + note.downloads, 0);
+                // Calculate total downloads
+                const totalDownloads = notes.reduce((sum, note) => sum + note.downloads, 0);
 
-            document.getElementById('totalNotes').textContent = notes.length.toLocaleString();
-            document.getElementById('totalUsers').textContent = users.length.toLocaleString();
-            document.getElementById('totalDownloads').textContent = totalDownloads.toLocaleString();
+                // Update DOM
+                document.getElementById('totalNotes').textContent = notes.length.toLocaleString();
+                document.getElementById('totalUsers').textContent = usersResponse.total.toLocaleString();
+                document.getElementById('totalDownloads').textContent = totalDownloads.toLocaleString();
+            } catch (error) {
+                showToast(`Failed to update stats: ${error.message}`, 'error');
+            }
         }
 
         // Show toast notification
